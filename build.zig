@@ -50,6 +50,7 @@ pub fn build(b: *std.Build) void {
 
     // Add imports
     kernel.addIncludePath(b.path("include"));
+    kernel.addCSourceFile(.{ .file = b.path("src/printf.c"), .flags = &.{} });
     kernelMod.addImport("limine", limineMod);
 
     // Install the kernel

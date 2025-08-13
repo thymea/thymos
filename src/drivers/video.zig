@@ -1,14 +1,16 @@
-const limine = @import("limine");
+const g = @import("../globals.zig");
 
 // Constants
 const CHUNK_SIZE: u8 = 16;
 
+// SSFN
+pub export var ssfn_src: ?*g.c.ssfn_font_t = null;
+pub export var ssfn_dst: g.c.ssfn_buf_t = undefined;
+
 // Framebuffer
-export var fbRequest: limine.FramebufferRequest linksection(".limine_requests") = .{};
-var fb: ?*limine.Framebuffer = null;
+export var fbRequest: g.limine.FramebufferRequest linksection(".limine_requests") = .{};
+var fb: ?*g.limine.Framebuffer = null;
 var pitchInPixels: u32 = 0;
-var bgColor: u32 = 0x000000;
-var fgColor: u32 = 0xffffff;
 
 // Initialize everything
 pub fn initVideo(backgroundColor: u32, foregroundColor: u32) void {
@@ -18,15 +20,24 @@ pub fn initVideo(backgroundColor: u32, foregroundColor: u32) void {
         fb = response.getFramebuffers()[0];
         pitchInPixels = @intCast(fb.?.pitch / @sizeOf(u32));
 
-        // Set stuff
-        bgColor = backgroundColor;
-        fgColor = foregroundColor;
+        // Initialize SSFN - Text renderer
+        g.c.ssfn_src = @ptrCast(@constCast(&g.font[0]));
+        g.c.ssfn_dst.ptr = @ptrCast(fb.?.address);
+        g.c.ssfn_dst.w = @intCast(fb.?.width);
+        g.c.ssfn_dst.h = @intCast(fb.?.height);
+        g.c.ssfn_dst.p = @intCast(fb.?.pitch);
+        g.c.ssfn_dst.x = 0;
+        g.c.ssfn_dst.y = 0;
+        g.c.ssfn_dst.bg = backgroundColor;
+        g.c.ssfn_dst.fg = foregroundColor;
     } else @panic("No framebuffer");
 }
 
-// Clear the screen
-pub fn clearScreen() void {
-    drawFilledRect(0, 0, @intCast(fb.?.width), @intCast(fb.?.height), bgColor);
+// Clear the screen and reset cursor position
+pub fn resetScreen() void {
+    drawFilledRect(0, 0, @intCast(fb.?.width), @intCast(fb.?.height), g.c.ssfn_dst.bg);
+    g.c.ssfn_dst.x = 0;
+    g.c.ssfn_dst.y = 0;
 }
 
 // Place a pixel
@@ -67,5 +78,35 @@ pub fn drawFilledRect(xpos: u64, ypos: u64, width: u32, height: u32, color: u32)
 
         // Advance to the next row
         pixelPtr += skip;
+    }
+}
+
+// Handle printing characters - Required for `printf`
+export fn _putchar(char: u8) void {
+    switch (char) {
+        // Newline
+        '\n' => {
+            g.c.ssfn_dst.x = 0;
+            if ((g.c.ssfn_dst.y + g.GLYPH_HEIGHT) > fb.?.height) {
+                resetScreen();
+            } else g.c.ssfn_dst.y += g.GLYPH_HEIGHT;
+        },
+
+        // Tab
+        '\t' => {
+            if ((g.c.ssfn_dst.x + (g.GLYPH_WIDTH * g.TAB_SPACES)) > fb.?.width) {
+                resetScreen();
+            } else {
+                for (0..4) |_|
+                    _putchar(' ');
+            }
+        },
+
+        // Normal character
+        else => {
+            if ((g.c.ssfn_dst.x + g.GLYPH_WIDTH) > fb.?.width) _putchar('\n');
+            if ((g.c.ssfn_dst.y + g.GLYPH_HEIGHT) > fb.?.height) resetScreen();
+            _ = g.c.ssfn_putc(char);
+        },
     }
 }
