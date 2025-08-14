@@ -1,7 +1,7 @@
 // OS
-const g = @import("globals.zig");
-const cpu = @import("cpu/cpu.zig");
-const drivers = @import("drivers/drivers.zig");
+const g = @import("index.zig");
+const cpu = @import("cpu/index.zig");
+const drivers = @import("drivers/index.zig");
 
 // Limine
 // Protocol base revision

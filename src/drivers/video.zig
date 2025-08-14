@@ -1,6 +1,15 @@
-const g = @import("../globals.zig");
+const g = @import("../index.zig");
 
 // Constants
+// Font
+const FONT = @embedFile("../fonts/unifont.sfn");
+const GLYPH_WIDTH: u8 = 8;
+const GLYPH_HEIGHT: u8 = 16;
+
+// Number of spaces in a tab character
+const TAB_SPACES: u8 = 4;
+
+// Number of pixels in one chunk
 const CHUNK_SIZE: u8 = 16;
 
 // SSFN
@@ -32,7 +41,7 @@ pub fn init(backgroundColor: u32, foregroundColor: u32) void {
         pitchInPixels = @intCast(fb.?.pitch / @sizeOf(u32));
 
         // Initialize SSFN - Text renderer
-        g.c.ssfn_src = @ptrCast(@constCast(&g.font[0]));
+        g.c.ssfn_src = @ptrCast(@constCast(&FONT[0]));
         g.c.ssfn_dst.ptr = @ptrCast(fb.?.address);
         g.c.ssfn_dst.w = @intCast(fb.?.width);
         g.c.ssfn_dst.h = @intCast(fb.?.height);
@@ -96,14 +105,14 @@ export fn _putchar(char: u8) void {
         // Newline
         '\n' => {
             g.c.ssfn_dst.x = 0;
-            if ((g.c.ssfn_dst.y + g.GLYPH_HEIGHT) > fb.?.height) {
+            if ((g.c.ssfn_dst.y + GLYPH_HEIGHT) > fb.?.height) {
                 resetScreen();
-            } else g.c.ssfn_dst.y += g.GLYPH_HEIGHT;
+            } else g.c.ssfn_dst.y += GLYPH_HEIGHT;
         },
 
         // Tab
         '\t' => {
-            if ((g.c.ssfn_dst.x + (g.GLYPH_WIDTH * g.TAB_SPACES)) > fb.?.width) {
+            if ((g.c.ssfn_dst.x + (GLYPH_WIDTH * TAB_SPACES)) > fb.?.width) {
                 resetScreen();
             } else {
                 for (0..4) |_|
@@ -113,8 +122,8 @@ export fn _putchar(char: u8) void {
 
         // Normal character
         else => {
-            if ((g.c.ssfn_dst.x + g.GLYPH_WIDTH) > fb.?.width) _putchar('\n');
-            if ((g.c.ssfn_dst.y + g.GLYPH_HEIGHT) > fb.?.height) resetScreen();
+            if ((g.c.ssfn_dst.x + GLYPH_WIDTH) > fb.?.width) _putchar('\n');
+            if ((g.c.ssfn_dst.y + GLYPH_HEIGHT) > fb.?.height) resetScreen();
             _ = g.c.ssfn_putc(char);
         },
     }
