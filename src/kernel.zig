@@ -15,11 +15,16 @@ export fn _start() callconv(.C) noreturn {
     if (!baseRevision.isSupported()) @panic("Limine base revision unsupported");
 
     // Initialize everything
+    // CPU
     asm volatile ("cli");
     g.cpu.gdt.init();
     g.cpu.idt.init();
     asm volatile ("sti");
+
+    // Drivers
     g.drivers.video.init(0x191724, 0xe0def4);
+    g.drivers.keyboard.init();
+    g.drivers.keyboard.registerKeyCallback(onKeyPress);
 
     // Clear the screen and print stuff
     g.drivers.video.resetScreen();
@@ -27,6 +32,13 @@ export fn _start() callconv(.C) noreturn {
 
     // Halt system
     while (true) {}
+}
+
+// Keyboard key callback
+fn onKeyPress(key: u8, pressed: bool) void {
+    if (pressed) {
+        _ = g.c.printf("%c", key);
+    }
 }
 
 // Handle interrupts
@@ -40,6 +52,7 @@ export fn interruptHandler(irqNum: u8, _: usize) void {
     else if (irqNum < 48) {
         if (g.cpu.idt.irqHandlers[irqNum - 32]) |handler| {
             handler(irqNum);
+            return;
         } else _ = g.c.printf("No handler for IRQ: %d\n", (irqNum - 32));
     }
 

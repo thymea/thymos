@@ -1,7 +1,7 @@
 const pic = @import("../drivers/index.zig").pic;
 
 // Types
-const irqHandler_t = fn (irqNum: u8) void;
+const irqHandler_t = *const fn (irqNum: u8) void;
 const idtr_t = packed struct {
     limit: u16,
     base: u64,
@@ -21,7 +21,7 @@ var idtr: idtr_t = undefined;
 var idt: [256]idtEntry_t align(16) = undefined;
 
 // Hardware interrupt handlers
-pub var irqHandlers: [16]?*irqHandler_t = .{null} ** 16;
+pub var irqHandlers: [16]?irqHandler_t = .{null} ** 16;
 
 // Assembly code
 extern fn loadIDT(idtr: *idtr_t) void;
@@ -96,13 +96,13 @@ pub fn init() void {
 }
 
 // Register/Deregister a hardware interrupt handler
-pub fn irqRegisterHandler(irqNum: u8, handler: *irqHandler_t) void {
-    if (irqNum < 16) {
-        irqHandlers[irqNum] = &handler;
+pub fn irqRegisterHandler(irqNum: u8, handler: irqHandler_t) void {
+    if (irqNum < irqHandlers.len) {
+        irqHandlers[irqNum] = handler;
     } else asm volatile ("cli; hlt");
 }
 pub fn irqDeregisterHandler(irqNum: u8) void {
-    if (irqNum < 16) {
+    if (irqNum < irqHandlers.len) {
         irqHandlers[irqNum] = null;
     } else asm volatile ("cli; hlt");
 }

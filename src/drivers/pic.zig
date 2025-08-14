@@ -63,27 +63,15 @@ pub fn remap(offset1: u8, offset2: u8) void {
 
 // Mask/Unmask interrupts
 pub fn maskIRQ(irqNum: u8) void {
-    var port: u16 = 0;
-    var value: u8 = 0;
-    if (irqNum < 8) {
-        port = PIC1_DATA;
-    } else {
-        port = PIC2_DATA;
-        irqNum -= 8;
-    }
-    value = io.inb(port) | (1 << irqNum);
+    const port: u16 = if (irqNum < 8) PIC1_DATA else PIC2_DATA;
+    const localIRQ: u8 = if (irqNum < 8) irqNum else irqNum - 8;
+    const value: u8 = io.inb(port) | (@as(u8, 1) << @as(u3, @intCast(localIRQ)));
     io.outb(port, value);
 }
 pub fn unmaskIRQ(irqNum: u8) void {
-    var port: u16 = 0;
-    var value: u8 = 0;
-    if (irqNum < 8) {
-        port = PIC1_DATA;
-    } else {
-        port = PIC2_DATA;
-        irqNum -= 8;
-    }
-    value = io.inb(port) & ~(1 << irqNum);
+    const port: u16 = if (irqNum < 8) PIC1_DATA else PIC2_DATA;
+    const localIRQ: u8 = if (irqNum < 8) irqNum else irqNum - 8;
+    const value: u8 = io.inb(port) & ~(@as(u8, 1) << @as(u3, @intCast(localIRQ)));
     io.outb(port, value);
 }
 
