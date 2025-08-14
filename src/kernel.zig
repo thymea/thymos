@@ -1,7 +1,5 @@
 // OS
 const g = @import("index.zig");
-const cpu = @import("cpu/index.zig");
-const drivers = @import("drivers/index.zig");
 
 // Limine
 // Protocol base revision
@@ -18,24 +16,35 @@ export fn _start() callconv(.C) noreturn {
 
     // Initialize everything
     asm volatile ("cli");
-    cpu.gdt.init();
-    cpu.idt.init();
+    g.cpu.gdt.init();
+    g.cpu.idt.init();
     asm volatile ("sti");
-    drivers.video.init(0x191724, 0xe0def4);
+    g.drivers.video.init(0x191724, 0xe0def4);
 
     // Clear the screen and print stuff
-    drivers.video.resetScreen();
+    g.drivers.video.resetScreen();
     _ = g.c.printf("Hello world!\n");
 
     // Halt system
-    g.halt();
+    while (true) {}
 }
 
 // Handle interrupts
 export fn interruptHandler(irqNum: u8, _: usize) void {
+    // The 32 CPU exceptions
     if (irqNum < 32) {
-        _ = g.c.printf("\nFATAL: %s\n", cpu.idt.cpuExceptionMsg[irqNum].ptr);
+        _ = g.c.printf("\nFATAL: %s\n", g.cpu.idt.cpuExceptionMsg[irqNum].ptr);
     }
+
+    // The 16 hardware interrupts
+    else if (irqNum < 48) {
+        if (g.cpu.idt.irqHandlers[irqNum - 32]) |handler| {
+            handler(irqNum);
+        } else _ = g.c.printf("No handler for IRQ: %d\n", (irqNum - 32));
+    }
+
+    // Unknown interrupt
+    else _ = g.c.printf("Invalid interrupt: %d\n", irqNum);
 
     // Disable interrupts and halt system
     asm volatile ("cli");

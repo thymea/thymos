@@ -1,4 +1,7 @@
+const pic = @import("../drivers/index.zig").pic;
+
 // Types
+const irqHandler_t = fn (irqNum: u8) void;
 const idtr_t = packed struct {
     limit: u16,
     base: u64,
@@ -16,6 +19,9 @@ const idtEntry_t = packed struct {
 // IDT
 var idtr: idtr_t = undefined;
 var idt: [256]idtEntry_t align(16) = undefined;
+
+// Hardware interrupt handlers
+pub var irqHandlers: [16]?*irqHandler_t = .{null} ** 16;
 
 // Assembly code
 extern fn loadIDT(idtr: *idtr_t) void;
@@ -57,6 +63,7 @@ pub const cpuExceptionMsg: [32][]const u8 = .{
     "Reserved",
 };
 
+// Helper functions
 // Set an IDT descriptor
 fn setIDTDesc(entry: *idtEntry_t, isr: *anyopaque, flags: u8) void {
     const isrPtr = @intFromPtr(isr);
@@ -79,6 +86,23 @@ pub fn init() void {
     for (0..32) |i|
         setIDTDesc(&idt[i], isrStubTable[i], 0x8e);
 
+    // The 16 hardware interrupts
+    pic.remap(32, 48);
+    for (32..48) |i|
+        setIDTDesc(&idt[i], isrStubTable[i], 0x8e);
+
     // Load the new IDT
     loadIDT(&idtr);
+}
+
+// Register/Deregister a hardware interrupt handler
+pub fn irqRegisterHandler(irqNum: u8, handler: *irqHandler_t) void {
+    if (irqNum < 16) {
+        irqHandlers[irqNum] = &handler;
+    } else asm volatile ("cli; hlt");
+}
+pub fn irqDeregisterHandler(irqNum: u8) void {
+    if (irqNum < 16) {
+        irqHandlers[irqNum] = null;
+    } else asm volatile ("cli; hlt");
 }

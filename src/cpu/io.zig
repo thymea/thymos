@@ -14,3 +14,9 @@ pub inline fn outb(port: u16, value: u8) void {
           [port] "N{dx}" (port),
     );
 }
+
+// Wait for about 1-4 microseconds
+pub inline fn wait() void {
+    // Perform an IO operation on an unused port
+    outb(0x80, 0);
+}

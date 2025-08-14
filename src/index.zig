@@ -7,6 +7,10 @@ pub const c = @cImport({
     @cInclude("printf.h");
 });
 
+// OS
+pub const cpu = @import("cpu/index.zig");
+pub const drivers = @import("drivers/index.zig");
+
 // Common useful functions
 // Halt CPU
 pub fn halt() noreturn {
