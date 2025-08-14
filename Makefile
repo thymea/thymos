@@ -7,6 +7,8 @@ ISO_DIR := $(BUILD_DIR)/isodir
 # Toolchain
 ZIG := zig
 ZIGFLAGS := -Doptimize=ReleaseSafe
+AS := nasm
+ASFLAGS := -f elf64
 
 # Run/Emulate the OS in QEMU
 run: $(BUILD_DIR)/$(OS_NAME).iso
@@ -39,8 +41,11 @@ limine:
 	make -C limine
 
 # Kernel
-kernel:
+kernel: $(BUILD_DIR)/asm.o
 	$(ZIG) build $(ZIGFLAGS)
+$(BUILD_DIR)/asm.o: src/asm.s
+	mkdir -p $(BUILD_DIR)
+	$(AS) $(ASFLAGS) $< -o $@
 
 # Remove Limine and all build output
 clean:

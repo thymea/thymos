@@ -12,6 +12,17 @@ export var fbRequest: g.limine.FramebufferRequest linksection(".limine_requests"
 var fb: ?*g.limine.Framebuffer = null;
 var pitchInPixels: u32 = 0;
 
+// Utility/Helper functions
+pub fn rgbToHex(red: u32, green: u32, blue: u32) u32 {
+    return ((red & 0xff) << 16) + ((green & 0xff) << 8) + (blue & 0xff);
+}
+pub fn setBgColor(color: u32) void {
+    ssfn_dst.bg = color;
+}
+pub fn setFgColor(color: u32) void {
+    ssfn_dst.fg = color;
+}
+
 // Initialize everything
 pub fn initVideo(backgroundColor: u32, foregroundColor: u32) void {
     // Ensure a framebuffer is present
@@ -40,14 +51,12 @@ pub fn resetScreen() void {
     g.c.ssfn_dst.y = 0;
 }
 
-// Place a pixel
+// Drawing
 pub fn drawPixel(xpos: u64, ypos: u64, color: u32) void {
     // Calculate the absolute pixel position and color it
     const pixelPos: [*]u32 = @as([*]u32, @ptrCast(@alignCast(fb.?.address))) + (ypos * fb.?.pitch) + (xpos * fb.?.bpp);
     pixelPos[0] = color;
 }
-
-// Draw a color filled rectangle
 pub fn drawFilledRect(xpos: u64, ypos: u64, width: u32, height: u32, color: u32) void {
     // Calculate the start position to start drawing in
     var pixelPtr: [*]u32 = @ptrFromInt(@intFromPtr(fb.?.address) + (ypos * fb.?.pitch) + (xpos * fb.?.bpp));

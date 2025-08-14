@@ -1,6 +1,7 @@
 // OS
 const g = @import("globals.zig");
-const video = @import("./drivers/video.zig");
+const cpu = @import("cpu/cpu.zig");
+const drivers = @import("drivers/drivers.zig");
 
 // Limine
 // Protocol base revision
@@ -20,9 +21,12 @@ export fn _start() callconv(.C) noreturn {
     // Ensure the Limine base revision is supported
     if (!baseRevision.isSupported()) @panic("Limine base revision unsupported");
 
-    // Initialize drivers
-    video.initVideo(0x000000, 0x00ff00);
-    video.resetScreen();
+    // Initialize everything
+    cpu.gdt.initGDT();
+    drivers.video.initVideo(0x191724, 0xe0def4);
+
+    // Clear the screen and print stuff
+    drivers.video.resetScreen();
     _ = g.c.printf("Hello world!\n");
     _ = g.c.printf("\tThis is cool innit bruv\n");
 
