@@ -9,9 +9,6 @@ const GLYPH_HEIGHT: u8 = 16;
 // Number of spaces in a tab character
 const TAB_SPACES: u8 = 4;
 
-// Number of pixels in one chunk
-const CHUNK_SIZE: u8 = 16;
-
 // SSFN
 pub export var ssfn_src: ?*g.c.ssfn_font_t = null;
 pub export var ssfn_dst: g.c.ssfn_buf_t = undefined;
@@ -67,35 +64,24 @@ pub fn drawPixel(xpos: u64, ypos: u64, color: u32) void {
     pixelPos[0] = color;
 }
 pub fn drawFilledRect(xpos: u64, ypos: u64, width: u32, height: u32, color: u32) void {
-    // Calculate the start position to start drawing in
-    var pixelPtr: [*]u32 = @ptrFromInt(@intFromPtr(fb.?.address) + (ypos * fb.?.pitch) + (xpos * fb.?.bpp));
+    // Clamp to valid range
+    if (xpos < 0 or ypos < 0) return;
+    if ((xpos + width) > fb.?.width) return;
+    if ((ypos + height) > fb.?.height) return;
 
-    // Calculate the amount of pixels to the next row
-    const skip: u32 = pitchInPixels - width;
-
-    // Calculate the number of chunks required for the rectangle
-    const chunks: u32 = width / CHUNK_SIZE;
-    const remainderChunks: u32 = width % CHUNK_SIZE;
-
-    // Create an array of pixels as large as the chunk size is
-    const pixelBatch: [CHUNK_SIZE]u32 = .{color} ** CHUNK_SIZE;
-
-    // Draw the rectangle
+    // Calculate the start position to start drawing in and draw the rectangle
+    var rowPtr: [*]u32 = @as([*]u32, @ptrCast(@alignCast(fb.?.address))) + ypos * pitchInPixels + xpos;
+    var pixelPtr: [*]u32 = rowPtr;
     for (0..height) |_| {
-        // Color chunks of 4 pixels
-        for (0..chunks) |_| {
-            @memcpy(pixelPtr, &pixelBatch);
-            pixelPtr += CHUNK_SIZE;
-        }
-
-        // Color remaining pixels
-        for (0..remainderChunks) |_| {
+        // Fill the entire row with color
+        pixelPtr = rowPtr;
+        for (0..width) |_| {
             pixelPtr[0] = color;
             pixelPtr += 1;
         }
 
         // Advance to the next row
-        pixelPtr += skip;
+        rowPtr += pitchInPixels;
     }
 }
 
@@ -118,6 +104,20 @@ export fn _putchar(char: u8) void {
                 for (0..4) |_|
                     _putchar(' ');
             }
+        },
+
+        // Backspace
+        0x08 => {
+            // Move cursor back to previous character
+            if (g.c.ssfn_dst.x >= GLYPH_WIDTH) {
+                g.c.ssfn_dst.x -= GLYPH_WIDTH;
+            } else if (g.c.ssfn_dst.y >= GLYPH_HEIGHT) {
+                g.c.ssfn_dst.y -= GLYPH_HEIGHT;
+                g.c.ssfn_dst.x = @intCast(fb.?.width - GLYPH_WIDTH);
+            } else return;
+
+            // Draw over the character to "erase it"
+            drawFilledRect(@intCast(g.c.ssfn_dst.x), @intCast(g.c.ssfn_dst.y), GLYPH_WIDTH, GLYPH_HEIGHT, g.c.ssfn_dst.bg);
         },
 
         // Normal character

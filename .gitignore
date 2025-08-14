@@ -1,3 +1,10 @@
+# Dependencies
+limine
+
+# Build output
 .zig-cache
 zig-out
+
+# IDE/Code editor specific
+# Vim/Neovim
 Session.vim
