@@ -24,7 +24,7 @@ pub fn setFgColor(color: u32) void {
 }
 
 // Initialize everything
-pub fn initVideo(backgroundColor: u32, foregroundColor: u32) void {
+pub fn init(backgroundColor: u32, foregroundColor: u32) void {
     // Ensure a framebuffer is present
     if (fbRequest.response) |response| {
         // Get the framebuffer

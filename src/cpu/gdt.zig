@@ -12,9 +12,9 @@ const gdtEntry_t = packed struct {
     baseHigh: u8,
 };
 
-// GDT and GDT register
-var gdt: [3]gdtEntry_t = undefined;
+// GDT
 var gdtr: gdtr_t = undefined;
+var gdt: [3]gdtEntry_t = undefined;
 
 // Assembly functions
 extern fn loadGDT(gdtr: *gdtr_t) void;
@@ -30,7 +30,7 @@ fn setGDTDesc(entry: *gdtEntry_t, base: u64, limit: u32, access: u8, granularity
 }
 
 // Initialize the GDT
-pub fn initGDT() void {
+pub fn init() void {
     // Initialize the GDT
     gdtr.size = @sizeOf(gdtEntry_t) * gdt.len - 1;
     gdtr.offset = @intFromPtr(&gdt[0]);
@@ -43,7 +43,5 @@ pub fn initGDT() void {
     // TODO: Add Task State Segments
 
     // Load the GDT into the GDT register
-    asm volatile ("cli");
     loadGDT(&gdtr);
-    asm volatile ("sti");
 }

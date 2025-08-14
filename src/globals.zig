@@ -14,3 +14,9 @@ pub const c = @cImport({
     @cInclude("ssfn.h");
     @cInclude("printf.h");
 });
+
+// Common useful functions
+// Halt CPU
+pub fn halt() noreturn {
+    while (true) asm volatile ("hlt");
+}
