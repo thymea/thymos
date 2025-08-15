@@ -59,11 +59,12 @@ fn kbIrqHandler(irqNum: u8) void {
     var key: u8 = 0;
     switch (scancode) {
         // Special characters
-        KB_SCANCODE_LEFT_SHIFT => shiftOn = pressed,
-        KB_SCANCODE_RIGHT_SHIFT => shiftOn = pressed,
-        KB_SCANCODE_CAPS_LOCK => capsLockOn = !capsLockOn,
+        KB_SCANCODE_LEFT_SHIFT, KB_SCANCODE_RIGHT_SHIFT => shiftOn = pressed,
         KB_SCANCODE_BACKSPACE => key = 0x08,
         KB_SCANCODE_ENTER => key = '\n',
+        KB_SCANCODE_CAPS_LOCK => if (pressed) {
+            capsLockOn = !capsLockOn;
+        },
 
         // Normal
         else => {
@@ -75,7 +76,7 @@ fn kbIrqHandler(irqNum: u8) void {
     }
 
     // Call the key callback function if it's registered
-    if (keyCallback) |callback| callback(key, pressed);
+    if (keyCallback != null and key != 0) keyCallback.?(key, pressed);
 
     // Interrupt has been handled
     pic.sendEOI(irqNum);
