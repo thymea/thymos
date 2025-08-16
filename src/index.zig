@@ -1,4 +1,5 @@
 // Common modules
+pub const builtin = @import("builtin");
 pub const limine = @import("limine");
 pub const c = @cImport({
     @cDefine("NULL", "((void*)0)");
@@ -14,7 +15,14 @@ pub const drivers = @import("drivers/index.zig");
 // Common useful functions
 // Halt CPU
 pub fn halt() noreturn {
-    while (true) asm volatile ("hlt");
+    while (true) {
+        switch (builtin.cpu.arch) {
+            .x86_64 => asm volatile ("hlt"),
+            .aarch64, .riscv64 => asm volatile ("wfi"),
+            .loongarch64 => asm volatile ("idle 0"),
+            else => unreachable,
+        }
+    }
 }
 
 // Check if two strings are equal

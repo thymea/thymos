@@ -14,11 +14,12 @@
     in {
       devShells.default = pkgs.mkShellNoCC {
         nativeBuildInputs = with pkgs; [
-          zig
-          gcc
-          nasm
-          xorriso
-          qemu
+          gnumake # Main build system
+          zig # Compiler
+          nasm # Assembler
+          xorriso # For creating the ISO
+          qemu # For emulating the OS
+          wget # For fetching dependencies
         ];
       };
     });
