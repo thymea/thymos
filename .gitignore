@@ -1,5 +1,6 @@
 # Dependencies
-limine
+3rdparty
+src/printf.c
 
 # Build output
 .zig-cache

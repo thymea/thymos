@@ -1,8 +1,8 @@
 const std = @import("std");
 
 // Constants
-const OS_NAME = "zigOS";
-const x86_FEATURE = std.Target.x86.Feature;
+const x86_FEATURE: type = std.Target.x86.Feature;
+const INCLUDE_DIR: []const u8 = "3rdparty";
 
 // Build graph
 pub fn build(b: *std.Build) void {
@@ -48,14 +48,16 @@ pub fn build(b: *std.Build) void {
     // Kernel binary/executable
     const kernel = b.addExecutable(.{ .name = "kernel.elf", .root_module = kernelMod });
 
-    // Add imports
-    kernel.addIncludePath(b.path("include"));
+    // Add C + Assembly libraries/code
+    kernel.addIncludePath(b.path(INCLUDE_DIR));
     kernel.addCSourceFile(.{ .file = b.path("src/printf.c"), .flags = &.{} });
     kernel.addObjectFile(b.path("zig-out/asm.o"));
+
+    // Add imports
     kernelMod.addImport("limine", limineMod);
 
     // Install the kernel
-    kernel.setLinkerScript(b.path("./src/linker.ld"));
+    kernel.setLinkerScript(b.path("src/linker.ld"));
     b.installArtifact(kernel);
 
     // Run step
