@@ -14,7 +14,7 @@
     in {
       devShells.default = pkgs.mkShellNoCC {
         nativeBuildInputs = with pkgs; [
-          gnumake # Main build system
+          gcc # Makefile and `cc` for compiling Limine binaries
           zig # Compiler
           nasm # Assembler
           xorriso # For creating the ISO

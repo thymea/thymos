@@ -12,6 +12,8 @@ AS := nasm
 ASFLAGS := -f elf64
 QEMU_FLAGS := --enable-kvm -no-reboot
 
+.PHONY: run fetchDeps clean
+
 # Run/Emulate the OS in QEMU
 run: $(BUILD_DIR)/$(OS_NAME).iso
 	qemu-system-x86_64 $(QEMU_FLAGS) -drive format=raw,media=cdrom,file=$<
@@ -23,8 +25,8 @@ $(BUILD_DIR)/$(OS_NAME).iso: fetchDeps limine.conf kernel
 
 	# Copy the kernel and Limine binaries into the ISO
 	cp -v $(BUILD_DIR)/bin/kernel.elf $(ISO_DIR)/boot/
-	cp -v limine.conf limine/limine-bios.sys limine/limine-bios-cd.bin limine/limine-uefi-cd.bin $(ISO_DIR)/boot/limine/
-	cp -v limine/BOOTIA32.EFI limine/BOOTX64.EFI $(ISO_DIR)/EFI/BOOT/
+	cp -v $(addprefix $(INCLUDE_DIR)/limine/, limine-bios.sys limine-bios-cd.bin limine-uefi-cd.bin) limine.conf $(ISO_DIR)/boot/limine/
+	cp -v $(addprefix $(INCLUDE_DIR)/limine/, BOOTIA32.EFI BOOTX64.EFI) $(ISO_DIR)/EFI/BOOT/
 
 	# Create the ISO
 	xorriso -as mkisofs -R -r -J -b boot/limine/limine-bios-cd.bin \
@@ -34,10 +36,10 @@ $(BUILD_DIR)/$(OS_NAME).iso: fetchDeps limine.conf kernel
 		$(ISO_DIR) -o $@
 
 	# Install Limine into the ISO
-	./limine/limine bios-install $@
+	./$(INCLUDE_DIR)/limine/limine bios-install $@
 
 # Fetch dependencies which also updates existing ones
-fetchDeps: limine
+fetchDeps: $(INCLUDE_DIR)/limine
 	mkdir -p $(INCLUDE_DIR)
 
 	# SSFN - Font loader and text renderer
@@ -48,11 +50,10 @@ fetchDeps: limine
 	wget https://raw.githubusercontent.com/mpaland/printf/refs/heads/master/printf.c -O src/printf.c
 
 # Fetch and build the latest version of Limine
-limine:
+$(INCLUDE_DIR)/limine:
 	# Limine
-	rm -rf limine
-	git clone https://github.com/limine-bootloader/limine.git --branch=v9.x-binary --depth=1 $(INCLUDE_DIR)/limine
-	make -C $(INCLUDE_DIR)/limine
+	git clone https://github.com/limine-bootloader/limine.git --branch=v9.x-binary --depth=1 $@
+	make -C $@
 
 	# Limine bindings for Zig
 	zig fetch --save git+https://github.com/48cf/limine-zig#trunk
@@ -69,7 +70,7 @@ $(BUILD_DIR)/asm.o: src/asm.s
 # Clean everything
 clean:
 	# Dependencies
-	rm -rf include src/printf.c
+	rm -rf $(INCLUDE_DIR) src/printf.c
 
 	# Build output and cache
 	rm -rf .zig-cache zig-out
