@@ -9,10 +9,11 @@ ZIG := zig
 ZIGFLAGS := -Doptimize=ReleaseSafe
 AS := nasm
 ASFLAGS := -f elf64
+QEMU_FLAGS := --enable-kvm -no-reboot
 
 # Run/Emulate the OS in QEMU
 run: $(BUILD_DIR)/$(OS_NAME).iso
-	qemu-system-x86_64 --enable-kvm -no-reboot -usb -drive format=raw,media=cdrom,file=$<
+	qemu-system-x86_64 $(QEMU_FLAGS) -drive format=raw,media=cdrom,file=$<
 
 # ISO
 $(BUILD_DIR)/$(OS_NAME).iso: limine limine.conf kernel
@@ -43,6 +44,8 @@ limine:
 # Kernel
 kernel: $(BUILD_DIR)/asm.o
 	$(ZIG) build $(ZIGFLAGS)
+
+# Helper assembly code
 $(BUILD_DIR)/asm.o: src/asm.s
 	mkdir -p $(BUILD_DIR)
 	$(AS) $(ASFLAGS) $< -o $@

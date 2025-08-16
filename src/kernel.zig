@@ -1,5 +1,6 @@
 // OS
 const g = @import("index.zig");
+const shell = @import("shell.zig");
 
 // Limine
 // Protocol base revision
@@ -21,24 +22,9 @@ export fn _start() callconv(.C) noreturn {
     g.cpu.idt.init();
     asm volatile ("sti");
 
-    // Drivers
-    g.drivers.video.init(0x191724, 0xe0def4);
-    g.drivers.keyboard.init();
-    g.drivers.keyboard.registerKeyCallback(onKeyPress);
-
-    // Clear the screen and print stuff
-    g.drivers.video.resetScreen();
-    _ = g.c.printf("Hello world!\n");
-
-    // Halt system
+    // Shell
+    shell.init(0x191724, 0xe0def4);
     while (true) {}
-}
-
-// Keyboard key callback
-fn onKeyPress(key: u8, pressed: bool) void {
-    if (pressed) {
-        _ = g.c.printf("%c", key);
-    }
 }
 
 // Handle interrupts
