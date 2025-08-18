@@ -43,11 +43,27 @@ pub fn cmdEcho(argc: u8, argv: argv_t) void {
 
 // Set colors
 pub fn setBgColor(argc: u8, argv: argv_t) void {
-    if (argc < 2) return;
-    g.drivers.video.setBgColor(g.drivers.video.strToHex(argv[1]));
-    g.drivers.video.resetScreen();
+    // Hex
+    if (argc == 2) {
+        g.drivers.video.setBgColor(g.drivers.video.strToHex(argv[1]));
+        g.drivers.video.resetScreen();
+    }
+
+    // RGB
+    else if (argc == 4) {}
+
+    // Invalid argument
+    else _ = g.c.printf("Invalid color\n");
 }
 pub fn setFgColor(argc: u8, argv: argv_t) void {
-    if (argc < 2) return;
-    g.drivers.video.setFgColor(g.drivers.video.strToHex(argv[1]));
+    // Hex
+    if (argc == 2) {
+        g.drivers.video.setFgColor(g.drivers.video.strToHex(argv[1]));
+    }
+
+    // RGB
+    else if (argc == 4) {}
+
+    // Invalid argument
+    else _ = g.c.printf("Invalid color\n");
 }
