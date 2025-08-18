@@ -24,6 +24,18 @@ export fn _start() callconv(.C) noreturn {
 
     // Shell
     shell.init(0x191724, 0xe0def4);
+
+    // Memory
+    g.memory.pmm.init();
+    const memStats = g.memory.pmm.stats();
+    _ = g.c.printf(
+        "\nTotal: %lu pages\nUsed: %lu pages\nFree: %lu pages\n",
+        memStats.total,
+        memStats.used,
+        memStats.free,
+    );
+
+    // Loop
     while (true) {}
 }
 

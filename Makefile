@@ -19,7 +19,7 @@ run: $(BUILD_DIR)/$(OS_NAME).iso
 	qemu-system-x86_64 $(QEMU_FLAGS) -drive format=raw,media=cdrom,file=$<
 
 # ISO
-$(BUILD_DIR)/$(OS_NAME).iso: fetchDeps limine.conf kernel
+$(BUILD_DIR)/$(OS_NAME).iso: limine.conf kernel
 	# Create required directories
 	mkdir -p $(ISO_DIR)/boot/limine $(ISO_DIR)/EFI/BOOT
 

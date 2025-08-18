@@ -11,6 +11,7 @@ pub const c = @cImport({
 // OS
 pub const cpu = @import("cpu/index.zig");
 pub const drivers = @import("drivers/index.zig");
+pub const memory = @import("memory/index.zig");
 
 // Common useful functions
 // Halt CPU
