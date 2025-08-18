@@ -19,6 +19,24 @@ var fb: ?*g.limine.Framebuffer = null;
 var pitchInPixels: u32 = 0;
 
 // Utility/Helper functions
+pub fn strToHex(colorStr: [*]u8) u32 {
+    var value: u32 = 0;
+    for (colorStr[0..6]) |c| {
+        var digit: u8 = 0;
+        if (c >= '0' and c <= '9') {
+            digit = c - '0';
+        } else if (c >= 'a' and c <= 'f') {
+            digit = c - 'a' + 10;
+        } else if (c >= 'A' and c <= 'F') {
+            digit = c - 'A' + 10;
+        } else {
+            _ = g.c.printf("Invalid hex digit: %s\n", colorStr);
+            return 0;
+        }
+        value = (value << 4) | @as(u32, digit);
+    }
+    return value;
+}
 pub fn rgbToHex(red: u32, green: u32, blue: u32) u32 {
     return ((red & 0xff) << 16) + ((green & 0xff) << 8) + (blue & 0xff);
 }

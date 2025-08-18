@@ -26,30 +26,13 @@ var shellCmds: [MAX_COMMANDS]shellCmd_t = undefined;
 var shellCmdCount: u8 = 0;
 
 // Initialize the shell
-pub fn init(bgColor: u32, fgColor: u32) void {
-    // Initialize the drivers
-    // Video
-    g.drivers.video.init(bgColor, fgColor);
-    g.drivers.video.resetScreen();
-
-    // Keyboard
-    g.drivers.keyboard.init();
+pub fn init() void {
+    // Register shell keyboard callback
     g.drivers.keyboard.registerKeyCallback(shellKeyCallback);
 
-    // Display shell prompt
+    // Display shell prompt and register all commands
     _ = g.c.printf("%s", shellPrompt.ptr);
-
-    // Register shell commands
-    registerCmd(.{
-        .name = "echo",
-        .desc = "Print text",
-        .handler = shellCommands.cmdEcho,
-    });
-    registerCmd(.{
-        .name = "clear",
-        .desc = "Clear the screen and reset cursor position",
-        .handler = shellCommands.cmdClear,
-    });
+    shellCommands.registerAllCmds();
 }
 
 // Register a command

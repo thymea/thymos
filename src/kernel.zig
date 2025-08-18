@@ -22,20 +22,28 @@ export fn _start() callconv(.C) noreturn {
     g.cpu.idt.init();
     asm volatile ("sti");
 
-    // Shell
-    shell.init(0x191724, 0xe0def4);
+    // Drivers
+    // Video
+    g.drivers.video.init(0x191724, 0xe0def4);
+    g.drivers.video.resetScreen();
+
+    // Keyboard
+    g.drivers.keyboard.init();
 
     // Memory
     g.memory.pmm.init();
     const memStats = g.memory.pmm.stats();
+    _ = g.c.printf("Initialized Physical Memory Manager (PMM) -\n");
     _ = g.c.printf(
-        "\nTotal: %lu pages\nUsed: %lu pages\nFree: %lu pages\n",
+        "\tTotal: %lu pages\n\tUsed: %lu pages\n\tFree: %lu pages\n",
         memStats.total,
         memStats.used,
         memStats.free,
     );
 
-    // Loop
+    // Shell
+    _ = g.c.printf("\n");
+    shell.init();
     while (true) {}
 }
 

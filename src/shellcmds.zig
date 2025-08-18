@@ -1,12 +1,53 @@
 const g = @import("index.zig");
+const shell = @import("shell.zig");
+
+// Constants
+const argv_t: type = [][*]u8;
+
+pub fn registerAllCmds() void {
+    // Basic
+    shell.registerCmd(.{
+        .name = "clear",
+        .desc = "Clear the screen",
+        .handler = cmdClear,
+    });
+    shell.registerCmd(.{
+        .name = "echo",
+        .desc = "Print some text",
+        .handler = cmdEcho,
+    });
+
+    // Set colors
+    shell.registerCmd(.{
+        .name = "setFgColor",
+        .desc = "Set foreground/text color",
+        .handler = setFgColor,
+    });
+    shell.registerCmd(.{
+        .name = "setBgColor",
+        .desc = "Set background color",
+        .handler = setBgColor,
+    });
+}
+
+// Clear the screen
+pub fn cmdClear(_: u8, _: argv_t) void {
+    g.drivers.video.resetScreen();
+}
 
 // Print stuff to the screen
-pub fn cmdEcho(argc: u8, argv: [][*]u8) void {
+pub fn cmdEcho(argc: u8, argv: argv_t) void {
     for (1..argc) |i| _ = g.c.printf("%s ", argv[i]);
     _ = g.c.printf("\n");
 }
 
-// Clear the screen
-pub fn cmdClear(_: u8, _: [][*]u8) void {
+// Set colors
+pub fn setBgColor(argc: u8, argv: argv_t) void {
+    if (argc < 2) return;
+    g.drivers.video.setBgColor(g.drivers.video.strToHex(argv[1]));
     g.drivers.video.resetScreen();
+}
+pub fn setFgColor(argc: u8, argv: argv_t) void {
+    if (argc < 2) return;
+    g.drivers.video.setFgColor(g.drivers.video.strToHex(argv[1]));
 }
