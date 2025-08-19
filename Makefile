@@ -12,14 +12,14 @@ AS := nasm
 ASFLAGS := -f elf64
 QEMU_FLAGS := --enable-kvm -no-reboot
 
-.PHONY: run fetchDeps clean
+.PHONY: fetchDeps kernel iso run clean
 
 # Run/Emulate the OS in QEMU
-run: $(BUILD_DIR)/$(OS_NAME).iso
-	qemu-system-x86_64 $(QEMU_FLAGS) -drive format=raw,media=cdrom,file=$<
+run: iso
+	qemu-system-x86_64 $(QEMU_FLAGS) -drive format=raw,media=cdrom,file=$(BUILD_DIR)/$(OS_NAME).iso
 
 # ISO
-$(BUILD_DIR)/$(OS_NAME).iso: limine.conf kernel
+iso: limine.conf kernel
 	# Create required directories
 	mkdir -p $(ISO_DIR)/boot/limine $(ISO_DIR)/EFI/BOOT
 
@@ -33,10 +33,10 @@ $(BUILD_DIR)/$(OS_NAME).iso: limine.conf kernel
 		-no-emul-boot -boot-load-size 4 -boot-info-table -hfsplus \
 		-apm-block-size 2048 --efi-boot boot/limine/limine-uefi-cd.bin \
 		-efi-boot-part --efi-boot-image --protective-msdos-label \
-		$(ISO_DIR) -o $@
+		$(ISO_DIR) -o $(BUILD_DIR)/$(OS_NAME).iso
 
 	# Install Limine into the ISO
-	./$(INCLUDE_DIR)/limine/limine bios-install $@
+	./$(INCLUDE_DIR)/limine/limine bios-install $(BUILD_DIR)/$(OS_NAME).iso
 
 # Fetch dependencies which also updates existing ones
 fetchDeps: $(INCLUDE_DIR)/limine
