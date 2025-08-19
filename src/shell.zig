@@ -22,8 +22,8 @@ var inputBuffer: [MAX_INPUT_SIZE]u8 = undefined;
 var inputIndex: u16 = 0;
 
 // Shell commands
-var shellCmds: [MAX_COMMANDS]shellCmd_t = undefined;
-var shellCmdCount: u8 = 0;
+pub var shellCmds: [MAX_COMMANDS]shellCmd_t = undefined;
+pub var shellCmdCount: u8 = 0;
 
 // Initialize the shell
 pub fn init() void {
@@ -84,6 +84,7 @@ fn parseCmd(cmd: [*:0]u8) void {
 
     // Unknown command
     _ = g.c.printf("Unknown command: %s\n", argv[0]);
+    _ = g.c.printf("Try `help`\n");
 }
 
 // Keyboard key callback

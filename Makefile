@@ -1,4 +1,4 @@
-OS_NAME := zigOS
+OS_NAME := thymos
 
 # Directories
 INCLUDE_DIR := 3rdparty
