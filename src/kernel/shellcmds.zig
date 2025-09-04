@@ -1,4 +1,4 @@
-const g = @import("index.zig");
+const g = @import("../index.zig");
 const shell = @import("shell.zig");
 
 // Constants

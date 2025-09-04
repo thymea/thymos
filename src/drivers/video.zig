@@ -65,7 +65,7 @@ pub fn init(backgroundColor: u32, foregroundColor: u32) void {
         g.c.ssfn_dst.y = 0;
         g.c.ssfn_dst.bg = backgroundColor;
         g.c.ssfn_dst.fg = foregroundColor;
-    } else @panic("No framebuffer");
+    } else @panic("No framebuffer available");
 }
 
 // Clear the screen and reset cursor position
@@ -78,8 +78,8 @@ pub fn resetScreen() void {
 // Drawing
 pub fn drawPixel(xpos: u64, ypos: u64, color: u32) void {
     // Calculate the absolute pixel position and color it
-    const pixelPos: [*]u32 = @as([*]u32, @ptrCast(@alignCast(fb.?.address))) + (ypos * fb.?.pitch) + (xpos * fb.?.bpp);
-    pixelPos[0] = color;
+    const pixels: [*]u32 = @ptrCast(@alignCast(fb.?.address));
+    pixels[ypos * pitchInPixels + xpos] = color;
 }
 pub fn drawFilledRect(xpos: u64, ypos: u64, width: u32, height: u32, color: u32) void {
     // Clamp to valid range

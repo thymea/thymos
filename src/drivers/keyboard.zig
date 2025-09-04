@@ -1,5 +1,4 @@
-const cpu = @import("../cpu/index.zig");
-const pic = @import("../drivers/index.zig").pic;
+const arch = @import("../index.zig").arch;
 
 // Types
 const keyCallback_t = *const fn (key: u8, pressed: bool) void;
@@ -49,9 +48,9 @@ var capsLockOn: bool = false;
 var keyCallback: ?keyCallback_t = null;
 
 // Keyboard interrupt request handler
-fn kbIrqHandler(irqNum: u8) void {
+fn kbIrqHandler(_: u8) void {
     // Get keyboard data
-    const scancodeRaw: u8 = cpu.io.inb(KB_PORT_DATA);
+    const scancodeRaw: u8 = arch.io.inb(KB_PORT_DATA);
     const scancode: u8 = scancodeRaw & ~KB_SCANCODE_RELEASE_MASK;
     const pressed: bool = (scancodeRaw & KB_SCANCODE_RELEASE_MASK) == 0;
 
@@ -77,22 +76,19 @@ fn kbIrqHandler(irqNum: u8) void {
 
     // Call the key callback function if it's registered
     if (keyCallback != null and key != 0) keyCallback.?(key, pressed);
-
-    // Interrupt has been handled
-    pic.sendEOI(irqNum);
 }
 
 // Initialize everything
 pub fn init() void {
     // Register the keyboard handler and unmask/enable keyboard interrupts
-    cpu.idt.irqRegisterHandler(1, @constCast(&kbIrqHandler));
-    pic.unmaskIRQ(1);
+    arch.interrupts.irqRegisterHandler(1, @constCast(&kbIrqHandler));
+    arch.irqController.unmaskIRQ(1);
 
     // Clear keyboard data register
-    while ((cpu.io.inb(KB_PORT_STATUS) & 0x1) != 0) _ = cpu.io.inb(KB_PORT_DATA);
+    while ((arch.io.inb(KB_PORT_STATUS) & 0x1) != 0) _ = arch.io.inb(KB_PORT_DATA);
 
     // Enable keyboard scanning to get scancodes
-    cpu.io.outb(KB_PORT_DATA, KB_CMD_ENABLE_SCANNING);
+    arch.io.outb(KB_PORT_DATA, KB_CMD_ENABLE_SCANNING);
 }
 
 // Register/Deregister key callback handler
@@ -105,6 +101,6 @@ pub fn deregisterKeyCallback() void {
 
 // Deregister the keyboard handler and mask/disable keyboard interrupts
 pub fn disableKb() void {
-    cpu.idt.irqDeregisterHandler(1);
-    pic.maskIRQ(1);
+    arch.interrupts.irqDeregisterHandler(1);
+    arch.irqController.maskIRQ(1);
 }

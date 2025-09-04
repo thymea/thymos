@@ -1,5 +1,3 @@
-const pic = @import("../drivers/index.zig").pic;
-
 // Types
 const irqHandler_t = *const fn (irqNum: u8) void;
 const idtr_t = packed struct {
@@ -87,7 +85,6 @@ pub fn init() void {
         setIDTDesc(&idt[i], isrStubTable[i], 0x8e);
 
     // The 16 hardware interrupts
-    pic.remap(32, 48);
     for (32..48) |i|
         setIDTDesc(&idt[i], isrStubTable[i], 0x8e);
 
