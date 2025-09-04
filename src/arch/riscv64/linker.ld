@@ -1,7 +1,7 @@
-/* Tell the linker that we want an x86_64 ELF64 output file */
-OUTPUT_FORMAT(elf64-x86-64)
+/* Tell the linker that we want a riscv64 ELF64 output file */
+OUTPUT_FORMAT(elf64-littleriscv)
 
-/* We want the symbol kmain to be our entry point */
+/* Kernel entry point */
 ENTRY(_start)
 
 /* Define the program headers we want so the bootloader gives us the right */
@@ -42,6 +42,8 @@ SECTIONS
 
     .rodata : {
         *(.rodata .rodata.*)
+        *(.srodata .srodata.*)
+        *(.sdata2 .sdata2.*)
     } :rodata
 
     /* Add a .note.gnu.build-id output section in case a build ID flag is added to the */
@@ -55,6 +57,7 @@ SECTIONS
 
     .data : {
         *(.data .data.*)
+        *(.sdata .sdata.*)
     } :data
 
     /* NOTE: .bss needs to be the last thing mapped to :data, otherwise lots of */
@@ -63,6 +66,7 @@ SECTIONS
     /* above this. */
     .bss : {
         *(.bss .bss.*)
+        *(.sbss .sbss.*)
         *(COMMON)
     } :data
 

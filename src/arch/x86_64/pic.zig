@@ -1,4 +1,4 @@
-const io = @import("../index.zig").cpu.io;
+const io = @import("index.zig").io;
 
 // Constants
 const PIC1: u8 = 0x20;

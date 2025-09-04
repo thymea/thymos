@@ -1,5 +1,6 @@
 # Dependencies
 3rdparty
+ovmf
 src/printf.c
 
 # Build output

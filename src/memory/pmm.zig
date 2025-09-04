@@ -70,7 +70,7 @@ fn markRangeUsed(base: u64, len: u64) void {
 // Initialize everything
 pub fn init() void {
     // Ensure memory maps are available
-    if (mmapRequest.response == null or hhdmRequest.response == null) g.halt();
+    if (mmapRequest.response == null or hhdmRequest.response == null) g.arch.halt();
 
     const mmap = mmapRequest.response.?;
     hhdmOffset = hhdmRequest.response.?.offset;
@@ -87,7 +87,7 @@ pub fn init() void {
         }
     }
 
-    if (largestIdx == null) g.halt();
+    if (largestIdx == null) g.arch.halt();
 
     totalPages = @intCast(alignUp(topPhys, PAGE_SIZE) / PAGE_SIZE);
 
@@ -96,7 +96,7 @@ pub fn init() void {
 
     // Place bitmap at start of largest usable memory region
     const bitmapStartPhys = alignUp(mmap.entries.?[largestIdx.?].base, PAGE_SIZE);
-    if (bitmapStartPhys + bitmap.len > mmap.entries.?[largestIdx.?].base + mmap.entries.?[largestIdx.?].length) g.halt();
+    if (bitmapStartPhys + bitmap.len > mmap.entries.?[largestIdx.?].base + mmap.entries.?[largestIdx.?].length) g.arch.halt();
     bitmap.ptr = @ptrFromInt(bitmapStartPhys + hhdmOffset);
     bitmap.basePage = bitmapStartPhys / PAGE_SIZE;
     bitmap.baseHhdm = bitmap.ptr;
