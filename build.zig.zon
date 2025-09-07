@@ -37,8 +37,8 @@
     // internet connectivity.
     .dependencies = .{
         .limine_zig = .{
-            .url = "git+https://github.com/48cf/limine-zig?ref=trunk#4281ba905cabe6d8ccd3e062d2e48364c3485172",
-            .hash = "limine_zig-0.0.0-1TjwQOl6AACYbbHZxh6lCxJ-WMBUoz03PUuBZhpKlxQs",
+            .url = "git+https://github.com/voxi0/limine-zig?ref=trunk#26e5613c94ef20c06d3bf3aaa6c603a1f5418456",
+            .hash = "limine_zig-0.0.0-1TjwQM14AABqdX7nvwmE5ceMp2IMx41uFai2gnqNWU_n",
         },
     },
     .paths = .{

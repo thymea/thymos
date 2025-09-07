@@ -4,7 +4,7 @@ target ?= x86_64
 # Directories
 INCLUDE_DIR := 3rdparty
 BUILD_DIR := zig-out
-ISO_DIR := $(BUILD_DIR)/$(target)
+ISO_DIR := $(BUILD_DIR)/$(target)/isodir
 
 # Toolchain
 ZIG := zig
@@ -24,7 +24,7 @@ endif
 run: iso ovmf/ovmf-code-$(target).fd
 	qemu-system-$(target) \
 		-drive if=pflash,unit=0,format=raw,file=ovmf/ovmf-code-$(target).fd,readonly=on \
-		-cdrom $(BUILD_DIR)/$(OS_NAME).iso \
+		-cdrom $(BUILD_DIR)/$(target)/$(OS_NAME).iso \
 		$(QEMUFLAGS)
 
 # ISO
@@ -44,10 +44,10 @@ ifeq ($(target),x86_64)
 		-no-emul-boot -boot-load-size 4 -boot-info-table -hfsplus \
 		-apm-block-size 2048 --efi-boot boot/limine/limine-uefi-cd.bin \
 		-efi-boot-part --efi-boot-image --protective-msdos-label \
-		$(ISO_DIR) -o $(BUILD_DIR)/$(OS_NAME).iso
+		$(ISO_DIR) -o $(BUILD_DIR)/$(target)/$(OS_NAME).iso
 
 	# Install Limine into the ISO
-	./$(INCLUDE_DIR)/limine/limine bios-install $(BUILD_DIR)/$(OS_NAME).iso
+	./$(INCLUDE_DIR)/limine/limine bios-install $(BUILD_DIR)/$(target)/$(OS_NAME).iso
 endif
 ifeq ($(target),riscv64)
 	cp -v $(INCLUDE_DIR)/limine/limine-uefi-cd.bin $(ISO_DIR)/boot/limine/
@@ -56,7 +56,7 @@ ifeq ($(target),riscv64)
 		-hfsplus -apm-block-size 2048 \
 		--efi-boot boot/limine/limine-uefi-cd.bin \
 		-efi-boot-part --efi-boot-image --protective-msdos-label \
-		$(ISO_DIR) -o $(BUILD_DIR)/$(OS_NAME).iso
+		$(ISO_DIR) -o $(BUILD_DIR)/$(target)/$(OS_NAME).iso
 endif
 
 # Fetch dependencies which also updates existing ones
@@ -86,7 +86,7 @@ $(INCLUDE_DIR)/limine:
 	make -C $@
 
 	# Limine bindings for Zig
-	zig fetch --save git+https://github.com/48cf/limine-zig#trunk
+	zig fetch --save git+https://github.com/voxi0/limine-zig#trunk
 
 # Kernel
 kernel: $(BUILD_DIR)/asm.o

@@ -11,7 +11,7 @@ export var startMarker: g.limine.RequestsStartMarker linksection(".limine_reques
 export var endMarker: g.limine.RequestsEndMarker linksection(".limine_requests_end") = .{};
 
 // Kernel entry point
-export fn _start() callconv(.C) noreturn {
+export fn _start() callconv(.c) noreturn {
     // Ensure the Limine base revision is supported
     if (!baseRevision.isSupported()) @panic("Limine base revision unsupported");
 
