@@ -7,10 +7,7 @@ BUILD_DIR := zig-out
 ISO_DIR := $(BUILD_DIR)/$(target)/isodir
 
 # Toolchain
-ZIG := zig
 ZIGFLAGS := -Darch=$(target) -Doptimize=ReleaseSafe
-AS := nasm
-ASFLAGS := -f elf64
 QEMU_FLAGS := -serial stdio
 QEMU_FLAGS_x86_64 :=
 QEMU_FLAGS_riscv64 := -machine virt -cpu sifive-u54 \
@@ -23,9 +20,8 @@ ifeq ($(filter $(target),x86_64 riscv64 aarch64),)
     $(error $(target) architecture not supported)
 endif
 
-.PHONY: fetchDeps kernel iso run clean
-
 # Run/Emulate the OS in QEMU
+.PHONY: run
 run: iso ovmf/ovmf-code-$(target).fd
 	qemu-system-$(target) \
 		-drive if=pflash,unit=0,format=raw,file=ovmf/ovmf-code-$(target).fd,readonly=on \
@@ -33,6 +29,7 @@ run: iso ovmf/ovmf-code-$(target).fd
 		$(QEMU_FLAGS) $(QEMU_FLAGS_$(target))
 
 # ISO
+.PHONY: iso
 iso: limine.conf kernel
 	# Create required directories
 	mkdir -p $(ISO_DIR)/boot/limine $(ISO_DIR)/EFI/BOOT
@@ -73,7 +70,13 @@ ifeq ($(target),aarch64)
 		$(ISO_DIR) -o $(BUILD_DIR)/$(target)/$(OS_NAME).iso
 endif
 
-# Fetch dependencies which also updates existing ones
+# Kernel
+.PHONY: kernel
+kernel:
+	zig build $(ZIGFLAGS)
+
+# Fetch dependencies
+.PHONY: fetchDeps
 fetchDeps: $(INCLUDE_DIR)/limine
 	mkdir -p $(INCLUDE_DIR)
 
@@ -84,16 +87,7 @@ fetchDeps: $(INCLUDE_DIR)/limine
 	wget https://raw.githubusercontent.com/mpaland/printf/refs/heads/master/printf.h -O $(INCLUDE_DIR)/printf.h
 	wget https://raw.githubusercontent.com/mpaland/printf/refs/heads/master/printf.c -O src/printf.c
 
-# UEFI firmware
-ovmf/ovmf-code-$(target).fd:
-	mkdir -p ovmf
-	curl -Lo $@ https://github.com/osdev0/edk2-ovmf-nightly/releases/latest/download/ovmf-code-$(target).fd
-	case "$(target)" in \
-		aarch64) dd if=/dev/zero of=$@ bs=1 count=0 seek=67108864 2>/dev/null;; \
-		riscv64) dd if=/dev/zero of=$@ bs=1 count=0 seek=33554432 2>/dev/null;; \
-	esac
-
-# Fetch and build the latest version of Limine
+# Get the latest version of the Limine bootloader and get the Zig bindings for the Limine protocol
 $(INCLUDE_DIR)/limine:
 	# Limine
 	git clone https://codeberg.org/Limine/Limine.git --branch=v9.x-binary --depth=1 $@
@@ -102,16 +96,17 @@ $(INCLUDE_DIR)/limine:
 	# Limine bindings for Zig
 	zig fetch --save git+https://github.com/voxi0/limine-zig#trunk
 
-# Kernel
-kernel: $(BUILD_DIR)/asm.o
-	$(ZIG) build $(ZIGFLAGS)
-
-# Helper assembly code
-$(BUILD_DIR)/asm.o: src/arch/x86_64/asm.s
-	mkdir -p $(BUILD_DIR)
-	$(AS) $(ASFLAGS) $< -o $@
+# UEFI firmware for QEMU
+ovmf/ovmf-code-$(target).fd:
+	mkdir -p ovmf
+	curl -Lo $@ https://github.com/osdev0/edk2-ovmf-nightly/releases/latest/download/ovmf-code-$(target).fd
+	case "$(target)" in \
+		aarch64) dd if=/dev/zero of=$@ bs=1 count=0 seek=67108864 2>/dev/null;; \
+		riscv64) dd if=/dev/zero of=$@ bs=1 count=0 seek=33554432 2>/dev/null;; \
+	esac
 
 # Clean everything
+.PHONY: clean
 clean:
 	# Build output and cache
 	rm -rf .zig-cache zig-out

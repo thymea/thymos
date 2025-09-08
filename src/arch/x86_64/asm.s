@@ -1,88 +1,55 @@
-[BITS 64]
+.extern interruptHandler
 
-; Macros
-; For defining interrupt service routines (ISRs)
-%macro isrErrStub 1
-  isr%+%1:
-    mov rsi, [rsp]      ; Error code
-    mov rdi, %1         ; Interrupt number
+// Macros to quickly and easily create an ISR
+.macro isrErrStub interruptNum
+  isr\interruptNum:
+    movq (%rsp), %rsi
+    movq $\interruptNum, %rdi
     call interruptHandler
-    add rsp, x08        ; Clean up error code
+    addq $8, %rsp
     iretq
-%endmacro
-%macro isrNoErrStub 1
-  isr%+%1:
-    xor rsi, rsi        ; No error code
-    mov rdi, %1         ; Interrupt number
+.endm
+.macro isrNoErrStub interruptNum
+  isr\interruptNum:
+    xorq %rsi, %rsi
+    movq $\interruptNum, %rdi
     call interruptHandler
     iretq
-%endmacro
+.endm
 
-; Create the 32 CPU exception and the 16 hardware interrupts
-%macro createExceptions 0
-  %assign i 0
-  %rep 32
-    %if i = 8 | i = 10 | i = 11 | i = 12 | i = 13 | i = 14 | i = 17 | i = 30
-      isrErrStub i
-    %else
-      isrNoErrStub i
-    %endif
-    %assign i i+1
-  %endrep
-%endmacro
-%macro createIRQs 0
-  %assign i 32
-  %rep 16
-    isrNoErrStub i
-    %assign i i+1
-  %endrep
-%endmacro
+// Load the GDT
+.globl loadGDT
+loadGDT:
+  lgdt (%rdi)
+  pushq $0x08
+  leaq .reloadCS(%rip), %rax
+  pushq %rax
+  lretq
+.reloadCS:
+  movw $0x10, %ax
+  movw %ax, %ds
+  movw %ax, %es
+  movw %ax, %fs
+  movw %ax, %gs
+  movw %ax, %ss
+  ret
 
-; Code section
-section .text
-  ; Load the GDT
-  global loadGDT
-  loadGDT:
-    lgdt [rdi]
+// Load the IDT
+.globl loadIDT
+loadIDT:
+  lidt (%rdi)
+  ret
 
-    ; Reload the code segment
-    ; Kernel code segment selector - Index in the GDT
-    push 0x08
-
-    ; Load memory address of `.reloadCS` into RAX and push it  to the stack
-    lea rax, [rel .reloadCS]
-    push rax
-
-    ; Far return to update code segment
-    retfq
-  .reloadCS:
-    ; Reload data segment registers
-    mov ax, 0x10
-    mov ds, ax
-    mov es, ax
-    mov fs, ax
-    mov gs, ax
-    mov ss, ax
-    ret
-
-  ; Create all the interrupt service routines (ISRs)
-  extern interruptHandler
-  createExceptions
-  createIRQs
-  global loadIDT, isrStubTable
-  loadIDT:
-    lidt [rdi]
-    ret
-  isrStubTable:
-    ; The 32 CPU exceptions
-    %assign i 0
-    %rep 32
-      dq isr%+i
-      %assign i i+1
-    %endrep
-
-    ; The 16 hardware interrupts
-    %rep 16
-      dq isr%+i
-      %assign i i+1
-    %endrep
+// Create the ISRs and ISR stub table
+.globl isrStubTable
+.rept 48
+  .if (\+ == 8) || (\+ == 10) || (\+ == 11) || (\+ == 12) || (\+ == 13) || (\+ == 14) || (\+ == 17) || (\+ == 30)
+    isrErrStub \+
+  .else
+    isrNoErrStub \+
+  .endif
+.endr
+isrStubTable:
+  .rept 48
+    .quad isr\+
+  .endr
