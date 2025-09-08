@@ -73,10 +73,10 @@ pub fn build(b: *std.Build) void {
     // x86 specific
     if (cpuArch == std.Target.Cpu.Arch.x86_64) {
         kernelMod.code_model = .kernel;
-        kernel.addObjectFile(b.path("zig-out/asm.o"));
+        kernelMod.addAssemblyFile(b.path("src/arch/x86_64/asm.s"));
     }
 
-    // Add C + Assembly libraries/code
+    // Add C libraries/code
     kernel.addIncludePath(b.path(INCLUDE_DIR));
     kernel.addCSourceFile(.{ .file = b.path("src/printf.c"), .flags = &.{} });
 

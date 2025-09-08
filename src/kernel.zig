@@ -48,27 +48,26 @@ export fn _start() callconv(.c) noreturn {
     // while (true) {}
 }
 
-// // Handle interrupts
+// Handle interrupts
 export fn interruptHandler(irqNum: u8, _: usize) void {
-    // The 32 CPU exceptions
-    //     if (irqNum < 32) {
-    //         _ = g.c.printf("\nFATAL: %s\n", g.arch.interrupts.cpuExceptionMsg[irqNum].ptr);
-    //     }
+    _ = irqNum;
+    // // The 32 CPU exceptions
+    // if (irqNum < 32) {
+    //     _ = g.c.printf("\nFATAL: %s\n", g.arch.interrupts.cpuExceptionMsg[irqNum].ptr);
+    // }
     //
-    //     // The 16 hardware interrupts
-    //     else if (irqNum < 48) {
-    //         if (g.arch.interrupts.irqHandlers[irqNum - 32]) |handler| {
-    //             handler(irqNum);
-    //             g.arch.irqController.sendEOI(irqNum);
-    //             return;
-    //         } else _ = g.c.printf("No handler for IRQ: %d\n", (irqNum - 32));
-    //     }
+    // // The 16 hardware interrupts
+    // else if (irqNum < 48) {
+    //     if (g.arch.interrupts.irqHandlers[irqNum - 32]) |handler| {
+    //         handler(irqNum);
+    //         g.arch.irqController.sendEOI(irqNum);
+    //         return;
+    //     } else _ = g.c.printf("No handler for IRQ: %d\n", (irqNum - 32));
+    // }
     //
-    //     // Unknown interrupt
-    //     else _ = g.c.printf("Invalid interrupt: %d\n", irqNum);
-    //
+    // // Unknown interrupt
+    // else _ = g.c.printf("Invalid interrupt: %d\n", irqNum);
 
     // Halt system
-    _ = irqNum;
     g.arch.halt();
 }

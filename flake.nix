@@ -20,7 +20,6 @@
         nativeBuildInputs = with pkgs; [
           gcc # Makefile and `cc` for compiling Limine binaries
           zigpkgs.master # Compiler
-          nasm # Assembler
           xorriso # For creating the ISO
           qemu # For emulating the OS
           wget # For fetching dependencies
