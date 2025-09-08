@@ -8,13 +8,18 @@ ISO_DIR := $(BUILD_DIR)/$(target)/isodir
 
 # Toolchain
 ZIG := zig
-ZIGFLAGS := -Doptimize=ReleaseSafe
+ZIGFLAGS := -Darch=$(target) -Doptimize=ReleaseSafe
 AS := nasm
 ASFLAGS := -f elf64
-QEMU_FLAGS :=
+QEMU_FLAGS := -serial stdio
+QEMU_FLAGS_x86_64 :=
+QEMU_FLAGS_riscv64 := -machine virt -cpu sifive-u54 \
+		-device ramfb -device qemu-xhci -device usb-kbd -device usb-mouse
+QEMU_FLAGS_aarch64 := -machine virt -cpu cortex-a72 \
+		-device ramfb -device qemu-xhci -device usb-kbd -device usb-mouse
 
 # Ensure all variables hold valid values
-ifeq ($(filter $(target),x86_64 riscv64),)
+ifeq ($(filter $(target),x86_64 riscv64 aarch64),)
     $(error $(target) architecture not supported)
 endif
 
@@ -25,7 +30,7 @@ run: iso ovmf/ovmf-code-$(target).fd
 	qemu-system-$(target) \
 		-drive if=pflash,unit=0,format=raw,file=ovmf/ovmf-code-$(target).fd,readonly=on \
 		-cdrom $(BUILD_DIR)/$(target)/$(OS_NAME).iso \
-		$(QEMUFLAGS)
+		$(QEMU_FLAGS) $(QEMU_FLAGS_$(target))
 
 # ISO
 iso: limine.conf kernel
@@ -52,6 +57,15 @@ endif
 ifeq ($(target),riscv64)
 	cp -v $(INCLUDE_DIR)/limine/limine-uefi-cd.bin $(ISO_DIR)/boot/limine/
 	cp -v $(INCLUDE_DIR)/limine/BOOTRISCV64.EFI $(ISO_DIR)/EFI/BOOT/
+	xorriso -as mkisofs -R -r -J \
+		-hfsplus -apm-block-size 2048 \
+		--efi-boot boot/limine/limine-uefi-cd.bin \
+		-efi-boot-part --efi-boot-image --protective-msdos-label \
+		$(ISO_DIR) -o $(BUILD_DIR)/$(target)/$(OS_NAME).iso
+endif
+ifeq ($(target),aarch64)
+	cp -v $(INCLUDE_DIR)/limine/limine-uefi-cd.bin $(ISO_DIR)/boot/limine/
+	cp -v $(INCLUDE_DIR)/limine/BOOTAA64.EFI $(ISO_DIR)/EFI/BOOT/
 	xorriso -as mkisofs -R -r -J \
 		-hfsplus -apm-block-size 2048 \
 		--efi-boot boot/limine/limine-uefi-cd.bin \
@@ -90,7 +104,7 @@ $(INCLUDE_DIR)/limine:
 
 # Kernel
 kernel: $(BUILD_DIR)/asm.o
-	$(ZIG) build $(ZIGFLAGS) -Darch=$(target)
+	$(ZIG) build $(ZIGFLAGS)
 
 # Helper assembly code
 $(BUILD_DIR)/asm.o: src/arch/x86_64/asm.s

@@ -20,12 +20,7 @@ pub fn build(b: *std.Build) void {
     switch (cpuArch) {
         .x86_64 => {
             targetQuery.cpu_features_add = std.Target.x86.featureSet(&.{.soft_float});
-            targetQuery.cpu_features_sub = std.Target.x86.featureSet(&.{ .mmx, .avx, .avx2, .sse, .sse2 });
-        },
-        .riscv64 => {
-            targetQuery.cpu_model = .baseline;
-            targetQuery.cpu_features_sub = std.Target.riscv.featureSet(&.{ .a, .c, .d, .e, .f });
-            targetQuery.cpu_features_add = std.Target.riscv.featureSet(&.{.m});
+            targetQuery.cpu_features_sub = std.Target.x86.featureSet(&.{.sse});
         },
         else => {},
     }
@@ -40,9 +35,18 @@ pub fn build(b: *std.Build) void {
     // Modules
     const kernelMod = b.createModule(.{
         .root_source_file = b.path("src/kernel.zig"),
-        .red_zone = false,
         .target = b.resolveTargetQuery(targetQuery),
         .optimize = optimize,
+        .link_libc = false,
+        .link_libcpp = false,
+        .pic = false, // Disable position independent code
+        .omit_frame_pointer = false, // Needed for stack traces
+
+        // Disable features that are problematic in kernel space
+        .red_zone = false,
+        .stack_check = false,
+        .stack_protector = false,
+
         .imports = &.{
             .{ .name = "limine", .module = limineDep.module("limine") },
         },
@@ -52,7 +56,19 @@ pub fn build(b: *std.Build) void {
     const kernel = b.addExecutable(.{
         .name = "kernel.elf",
         .root_module = kernelMod,
+        .linkage = .static,
     });
+
+    // Delete unused sections to reduce the kernel size
+    kernel.link_function_sections = true;
+    kernel.link_data_sections = true;
+    kernel.link_gc_sections = true;
+
+    // Force the page size to 4kb to prevent binary bloat
+    kernel.link_z_max_page_size = 0x1000;
+
+    // Disable LTO as it can lead to issues for kernels
+    kernel.want_lto = false;
 
     // x86 specific
     if (cpuArch == std.Target.Cpu.Arch.x86_64) {
