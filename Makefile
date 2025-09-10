@@ -1,5 +1,8 @@
 OS_NAME := thymos
 target ?= x86_64
+cpu_x86_64 ?= host
+cpu_riscv64 ?= sifive-u54
+cpu_aarch64 ?= cortex-a72
 
 # Directories
 INCLUDE_DIR := 3rdparty
@@ -8,11 +11,11 @@ ISO_DIR := $(BUILD_DIR)/$(target)/isodir
 
 # Toolchain
 ZIGFLAGS := -Darch=$(target) -Doptimize=ReleaseSafe
-QEMU_FLAGS := -serial stdio
-QEMU_FLAGS_x86_64 :=
-QEMU_FLAGS_riscv64 := -machine virt -cpu sifive-u54 \
+QEMU_FLAGS := -serial stdio -cpu $(cpu_$(target))
+QEMU_FLAGS_x86_64 := --enable-kvm
+QEMU_FLAGS_riscv64 := -machine virt \
 		-device ramfb -device qemu-xhci -device usb-kbd -device usb-mouse
-QEMU_FLAGS_aarch64 := -machine virt -cpu cortex-a72 \
+QEMU_FLAGS_aarch64 := -machine virt \
 		-device ramfb -device qemu-xhci -device usb-kbd -device usb-mouse
 
 # Ensure all variables hold valid values

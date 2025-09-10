@@ -18,6 +18,9 @@ export var fbRequest: g.limine.FramebufferRequest linksection(".limine_requests"
 var fb: *g.limine.Framebuffer = undefined;
 var pitchInPixels: u32 = 0;
 
+var lastCursorX: c_int = 0;
+var lastCursorY: c_int = 0;
+
 // Utility/Helper functions
 pub fn strToHex(colorStr: [*]u8) u32 {
     var value: u32 = 0;
@@ -111,6 +114,9 @@ pub fn drawFilledRect(xpos: u64, ypos: u64, width: u32, height: u32, color: u32)
 
 // Handle printing characters - Required for `printf`
 export fn _putchar(char: u8) void {
+    // Erase previous cursor by drawing over it
+    drawFilledRect(@intCast(lastCursorX), @intCast(lastCursorY), 1, GLYPH_HEIGHT, ssfn_dst.bg);
+
     switch (char) {
         // Newline
         '\n' => {
@@ -158,5 +164,8 @@ export fn _putchar(char: u8) void {
         },
     }
 
+    // Draw text cursor and save it's position
     drawFilledRect(@intCast(ssfn_dst.x), @intCast(ssfn_dst.y), 1, GLYPH_HEIGHT, ssfn_dst.fg);
+    lastCursorX = ssfn_dst.x;
+    lastCursorY = ssfn_dst.y;
 }
