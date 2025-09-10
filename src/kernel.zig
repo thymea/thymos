@@ -47,7 +47,7 @@ export fn _start() callconv(.c) noreturn {
     while (true) {}
 }
 
-// // Handle interrupts
+// Handle interrupts
 export fn interruptHandler(irqNum: u8, _: usize) void {
     // The 32 CPU exceptions
     if (irqNum < 32) {
