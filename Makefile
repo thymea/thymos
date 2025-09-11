@@ -1,13 +1,15 @@
 OS_NAME := thymos
-target ?= x86_64
-cpu_x86_64 ?= host
-cpu_riscv64 ?= sifive-u54
-cpu_aarch64 ?= cortex-a72
 
 # Directories
 INCLUDE_DIR := 3rdparty
 BUILD_DIR := zig-out
 ISO_DIR := $(BUILD_DIR)/$(target)/isodir
+
+# Target and CPU
+target ?= x86_64
+cpu_x86_64 ?= host
+cpu_riscv64 ?= sifive-u54
+cpu_aarch64 ?= cortex-a72
 
 # Toolchain
 ZIGFLAGS := -Darch=$(target) -Doptimize=ReleaseSafe
@@ -22,6 +24,8 @@ QEMU_FLAGS_aarch64 := -machine virt \
 ifeq ($(filter $(target),x86_64 riscv64 aarch64),)
     $(error $(target) architecture not supported)
 endif
+
+all: fetchDeps run
 
 # Run/Emulate the OS in QEMU
 .PHONY: run
@@ -80,7 +84,7 @@ kernel:
 
 # Fetch dependencies
 .PHONY: fetchDeps
-fetchDeps: $(INCLUDE_DIR)/limine
+fetchDeps: $(INCLUDE_DIR)/limine ovmf/ovmf-code-$(target).fd
 	mkdir -p $(INCLUDE_DIR)
 
 	# SSFN - Font loader and text renderer
@@ -93,6 +97,7 @@ fetchDeps: $(INCLUDE_DIR)/limine
 # Get the latest version of the Limine bootloader and get the Zig bindings for the Limine protocol
 $(INCLUDE_DIR)/limine:
 	# Limine
+	rm -rf $@
 	git clone https://codeberg.org/Limine/Limine.git --branch=v9.x-binary --depth=1 $@
 	make -C $@
 

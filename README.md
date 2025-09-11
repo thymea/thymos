@@ -1,5 +1,6 @@
 # thymos
-A simple x86 64-bit hobby operating system written from scratch in Zig.
+A simple 64-bit hobby operating system written from scratch in Zig. Currently only supports x86 but aiming to support RISC-V and
+then ARM in the near future.
 
 ## Features
 - Works on real hardware and supports UEFI as well
@@ -10,7 +11,7 @@ A simple x86 64-bit hobby operating system written from scratch in Zig.
 - Basic PS/2 keyboard driver and a shell for user input
 
 ## Try it
-[Watch the showcase/demo here](https://video.hardlimit.com/w/2PxYCaSEbWVUaoYZAronmH) to see what `thymos` is currently
+[Watch the showcase/demo here](https://video.hardlimit.com/w/2PxYCaSEbWVUaoYZAronmH) to see what this operating system is currently
 capable of. I wouldn't be surprised if you're unimpressed because there's nothing fancy going on :)
 
 ### Virtual (Recommended)
@@ -33,9 +34,8 @@ flake dependencies to use the latest version of all packages that the developmen
 
 If you can't or don't want to use Nix then you'll need to download the following tools manually ->
     - `zig` - To compile the kernel itself. It's written in Zig obviously
-    - `nasm` - Assembler since some things are written in x86 assembly ('Twas unavoidable sadly)
     - `qemu` - For emulating the OS to rapidly test it duh
-    - `gcc` - To use makefiles for compiling Limine binaries
+    - `gcc` - To use makefiles and for compiling Limine binaries
     - `wget` - For fetching dependencies e.g. `ssfn.h`
     - `xorriso` - For creating the ISO
 
@@ -45,9 +45,12 @@ If you can't or don't want to use Nix then you'll need to download the following
 make fetchDeps
 
 # Build
-make            - Compile and run/emulate thymos in QEMU
-make kernel     - Build the kernel
-make iso        - Create bootable ISO image
+make                                            - Compile and emulate the operating system in QEMU (x86)
+make kernel                                     - Build the kernel
+make iso                                        - Create bootable ISO image
+make run                                        - Emulate the operating system (x86)
+make run target="<architecture>" cpu="<cpu>"    - Supported architectures are `x86_64`, `riscv64` and `aarch64`
+                                                - Default CPUs are already set so you don't have to manually set them
 
 # Remove build output, cache and project dependencies e.g. Limine
 make clean
@@ -62,7 +65,7 @@ make clean
 - ACPI for power management
 
 ## Acknowledgements
-- [Limine](https://limine-bootloader.org/) - Modern bootloader + boot protocol. Boots the machine into 64-bit long mode
+- [Limine](https://codeberg.org/Limine/Limine/) - Modern bootloader + boot protocol. Boots the machine into 64-bit long mode
 with paging and everything set up before handing over control to the kernel.
 - [SSFN](https://gitlab.com/bztsrc/scalable-font2/) - Very fast, efficient and lightweight text renderer that has no
 dependencies when using the minimal renderer. Even the normal renderer barely has any. Uses special `.sfn` fonts that
