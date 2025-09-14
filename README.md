@@ -1,6 +1,12 @@
-# thymos
-A simple 64-bit hobby operating system written from scratch in Zig. Currently only supports x86 but aiming to support RISC-V and
-then ARM in the near future.
+<div align="center">
+    <h1>thymos</h1>
+    <p align="center">
+        <img src="https://img.shields.io/github/license/Voxi0/NixNvim?style=flat-square&logo=Github&label=License&labelColor=black&color=white" alt="License">
+        <img src="https://img.shields.io/github/languages/code-size/Voxi0/NixNvim?style=flat-square&logo=Files&label=Size&labelColor=black&color=white" alt="Repo Size">
+    </p>
+</div>
+
+A simple 64-bit hobby operating system written from scratch in Zig. Currently only supports x86 but aiming to support RISC-V and ARM in the near future.
 
 ## Features
 - Works on real hardware and supports UEFI as well
@@ -41,7 +47,6 @@ If you can't or don't want to use Nix then you'll need to download the following
 
 ### Makefile Commands
 ```shell
-# RUN THIS COMMAND FIRST TO FETCH ALL THE REQUIRED LIBRARIES e.g. Limine bootloader
 make fetchDeps
 
 # Build
@@ -65,10 +70,15 @@ make clean
 - ACPI for power management
 
 ## Acknowledgements
-- [Limine](https://codeberg.org/Limine/Limine/) - Modern bootloader + boot protocol. Boots the machine into 64-bit long mode
-with paging and everything set up before handing over control to the kernel.
-- [SSFN](https://gitlab.com/bztsrc/scalable-font2/) - Very fast, efficient and lightweight text renderer that has no
-dependencies when using the minimal renderer. Even the normal renderer barely has any. Uses special `.sfn` fonts that
-can be obtained from normal font files e.g. `.ttf` thanks to the provided converter tool.
+- [Limine](https://codeberg.org/Limine/Limine/) - Modern, advanced, portable, multiprotocol bootloader and boot manager
+- [SSFN](https://gitlab.com/bztsrc/scalable-font2/) - Very fast, efficient and lightweight text renderer
 - [Tiny Printf](https://github.com/mpaland/printf) - Tiny, fast, non-dependent and fully loaded `printf` implementation
-for embedded systems that's extremely easy to integrate into a project.
+for embedded systems.
+
+## Contributors
+<div align="center">
+    <a href="https://github.com/Voxi0/NixDots/graphs/contributors">
+        <img src="https://contrib.rocks/image?repo=Voxi0/NixDots&max=10&columns=12&anon=0"/>
+    </a>
+    <p>Made with <a href="https://contrib.rocks">contrib.rocks</a></p>
+</div>
