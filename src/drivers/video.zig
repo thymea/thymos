@@ -113,7 +113,7 @@ pub fn drawFilledRect(xpos: u64, ypos: u64, width: u32, height: u32, color: u32)
 }
 
 // Handle printing characters - Required for `printf`
-export fn _putchar(char: u8) void {
+export fn putchar_(char: u8) void {
     // Erase previous cursor by drawing over it
     drawFilledRect(@intCast(lastCursorX), @intCast(lastCursorY), 1, GLYPH_HEIGHT, ssfn_dst.bg);
 
@@ -132,7 +132,7 @@ export fn _putchar(char: u8) void {
                 resetScreen();
             } else {
                 for (0..4) |_|
-                    _putchar(' ');
+                    putchar_(' ');
             }
         },
 
@@ -158,7 +158,7 @@ export fn _putchar(char: u8) void {
 
         // Normal character
         else => {
-            if ((ssfn_dst.x + GLYPH_WIDTH) > fb.width) _putchar('\n');
+            if ((ssfn_dst.x + GLYPH_WIDTH) > fb.width) putchar_('\n');
             if ((ssfn_dst.y + GLYPH_HEIGHT) > fb.height) resetScreen();
             _ = g.c.ssfn_putc(char);
         },

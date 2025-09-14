@@ -1,15 +1,15 @@
 OS_NAME := thymos
 
-# Directories
-INCLUDE_DIR := 3rdparty
-BUILD_DIR := zig-out
-ISO_DIR := $(BUILD_DIR)/$(target)/isodir
-
 # Target and CPU
 target ?= x86_64
 cpu_x86_64 ?= host
 cpu_riscv64 ?= sifive-u54
 cpu_aarch64 ?= cortex-a72
+
+# Directories
+INCLUDE_DIR := 3rdparty
+BUILD_DIR := zig-out
+ISO_DIR := $(BUILD_DIR)/$(target)/isodir
 
 # Toolchain
 ZIGFLAGS := -Darch=$(target) -Doptimize=ReleaseSafe
@@ -24,8 +24,6 @@ QEMU_FLAGS_aarch64 := -machine virt \
 ifeq ($(filter $(target),x86_64 riscv64 aarch64),)
     $(error $(target) architecture not supported)
 endif
-
-all: fetchDeps run
 
 # Run/Emulate the OS in QEMU
 .PHONY: run
@@ -85,14 +83,14 @@ kernel:
 # Fetch dependencies
 .PHONY: fetchDeps
 fetchDeps: $(INCLUDE_DIR)/limine ovmf/ovmf-code-$(target).fd
-	mkdir -p $(INCLUDE_DIR)
+	mkdir -p $(INCLUDE_DIR)/printf
 
 	# SSFN - Font loader and text renderer
 	wget https://gitlab.com/bztsrc/scalable-font2/-/raw/master/ssfn.h -O $(INCLUDE_DIR)/ssfn.h
 
 	# Tiny Printf - Very small, fast and dependency free `printf` implementation for embedded systems
-	wget https://raw.githubusercontent.com/mpaland/printf/refs/heads/master/printf.h -O $(INCLUDE_DIR)/printf.h
-	wget https://raw.githubusercontent.com/mpaland/printf/refs/heads/master/printf.c -O src/printf.c
+	wget https://raw.githubusercontent.com/eyalroz/printf/refs/heads/master/src/printf/printf.h -O $(INCLUDE_DIR)/printf/printf.h
+	wget https://raw.githubusercontent.com/eyalroz/printf/refs/heads/master/src/printf/printf.c -O src/printf.c
 
 # Get the latest version of the Limine bootloader and get the Zig bindings for the Limine protocol
 $(INCLUDE_DIR)/limine:

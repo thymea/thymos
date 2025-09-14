@@ -5,7 +5,9 @@ pub const c = @cImport({
     @cDefine("NULL", "((void*)0)");
     @cDefine("SSFN_CONSOLEBITMAP_TRUECOLOR", {});
     @cInclude("ssfn.h");
-    @cInclude("printf.h");
+
+    @cDefine("PRINTF_ALIAS_STANDARD_FUNCTION_NAMES_HARD", "1");
+    @cInclude("printf/printf.h");
 });
 
 // OS

@@ -20,7 +20,7 @@ pub fn build(b: *std.Build) void {
     switch (cpuArch) {
         .x86_64 => {
             targetQuery.cpu_features_add = std.Target.x86.featureSet(&.{.soft_float});
-            targetQuery.cpu_features_sub = std.Target.x86.featureSet(&.{.sse});
+            targetQuery.cpu_features_sub = std.Target.x86.featureSet(&.{ .sse, .sse2 });
         },
         else => {},
     }
@@ -78,7 +78,7 @@ pub fn build(b: *std.Build) void {
 
     // Add C libraries/code
     kernel.addIncludePath(b.path(INCLUDE_DIR));
-    kernel.addCSourceFile(.{ .file = b.path("src/printf.c"), .flags = &.{} });
+    kernel.addCSourceFile(.{ .file = b.path("src/printf.c"), .flags = &.{"-DPRINTF_ALIAS_STANDARD_FUNCTION_NAMES_HARD=1"} });
 
     // Install the kernel
     kernel.setLinkerScript(b.path(b.fmt("src/arch/{s}/linker.ld", .{@tagName(cpuArch)})));
