@@ -1,4 +1,7 @@
 # thymos
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/045cb34d2fb94cdbab8fca64809e9259)](https://app.codacy.com/gh/thymea/thymos?utm_source=github.com&utm_medium=referral&utm_content=thymea/thymos&utm_campaign=Badge_Grade)
+
 A simple 64-bit hobby operating system written from scratch in Zig. Currently only supports x86 but aiming to support RISC-V and
 then ARM in the near future.
 
