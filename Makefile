@@ -96,7 +96,7 @@ fetchDeps: $(INCLUDE_DIR)/limine ovmf/ovmf-code-$(target).fd
 $(INCLUDE_DIR)/limine:
 	# Limine
 	rm -rf $@
-	git clone https://codeberg.org/Limine/Limine.git --branch=v9.x-binary --depth=1 $@
+	git clone https://codeberg.org/Limine/Limine.git --branch=v10.x-binary --depth=1 $@
 	make -C $@
 
 	# Limine bindings for Zig

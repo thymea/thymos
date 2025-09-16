@@ -72,7 +72,7 @@ make clean
 ## Acknowledgements
 - [Limine](https://codeberg.org/Limine/Limine/) - Modern, advanced, portable, multiprotocol bootloader and boot manager
 - [SSFN](https://gitlab.com/bztsrc/scalable-font2/) - Very fast, efficient and lightweight text renderer
-- [Tiny Printf](https://github.com/mpaland/printf) - Tiny, fast, non-dependent and fully loaded `printf` implementation
+- [Tiny Printf](https://github.com/eyalroz/printf) - Tiny, fast, non-dependent and fully loaded `printf` implementation
 for embedded systems.
 
 ## Contributors
