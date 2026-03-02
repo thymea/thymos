@@ -1,4 +1,9 @@
-compile_commands.json
 .cache/
-include/
+
 build/
+compile_commands.json
+
+include/ssfn.h
+include/limine
+include/printf/printf.h
+include/printf/printf.c

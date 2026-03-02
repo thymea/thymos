@@ -6,21 +6,26 @@ SRC_DIR := src
 INCLUDE_DIR := include
 LIMINE_DIR := $(INCLUDE_DIR)/limine
 BUILD_DIR := build
+FONTS_DIR := fonts
 ISO_DIR := $(BUILD_DIR)/isodir/$(ARCH)
 
 # Toolchain
-CXX := clang++
-LD := clang++
+CC := $(ARCH)-elf-gcc
+CXX := $(ARCH)-elf-g++
+LD := ld
 AS := nasm
-CXXFLAGS := -I $(INCLUDE_DIR) -I $(SRC_DIR) -target $(ARCH)-elf -std=c++26 -Wall -Wextra -Werror -pedantic-errors \
-			-m64 -mabi=sysv -mno-80387 -mno-sse -mno-sse2 -mno-red-zone -mcmodel=kernel \
-			-fno-builtin -fno-stack-protector -fno-stack-protector -fno-lto -fno-PIC -fno-exceptions -fno-rtti \
-			-ffreestanding -ffunction-sections -fdata-sections -fsanitize=address -fsanitize=undefined
+COMMON_FLAGS := -I $(INCLUDE_DIR) -I $(SRC_DIR) -Wall -Wextra -Werror -pedantic-errors \
+			-m64 -mabi=sysv -mno-80387 -mno-sse2 -mno-red-zone -mcmodel=kernel \
+			-fno-builtin -fno-stack-protector -fno-stack-protector -fno-lto -fno-PIE -fno-PIC -fno-exceptions \
+			-ffreestanding -ffunction-sections -fdata-sections -DPRINTF_INCLUDE_CONFIG_H=1
+CFLAGS := $(COMMON_FLAGS)
+CXXFLAGS := $(COMMON_FLAGS) -std=c++26 -Wno-register -fno-rtti
 LDFLAGS := -nostdlib -static -z max-page-size=0x1000
 
 # Find all source files
-SRCS := $(shell find $(SRC_DIR) -name "*.cpp")
-OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
+SRCS := $(shell find $(SRC_DIR) -name "*.cpp") $(INCLUDE_DIR)/printf/printf.c
+FONTS := $(shell find $(FONTS_DIR) -name "*.sfn")
+OBJS := $(SRCS:%=$(BUILD_DIR)/%.o) $(FONTS:%=$(BUILD_DIR)/%.o)
 
 # Architecture specific
 ifeq ($(ARCH), x86_64)
@@ -45,6 +50,16 @@ fetchDeps:
 	@make -C $(LIMINE_DIR)
 	@echo "[DEPS] Fetching Limine protocol header file"
 	@wget https://codeberg.org/Limine/limine-protocol/raw/branch/trunk/include/limine.h -O $(LIMINE_DIR)/limine.h
+
+	# SSFN text renderer
+	@echo "[DEPS] Fetching SSFN header file"
+	@wget https://gitlab.com/bztsrc/scalable-font2/-/raw/master/ssfn.h?ref_type=heads -O $(INCLUDE_DIR)/ssfn.h
+
+	# Tiny printf implementation
+	@echo "[DEPS] Fetching Tiny Printf implementation"
+	@mkdir -p $(INCLUDE_DIR)/printf
+	@wget https://raw.githubusercontent.com/eyalroz/printf/refs/heads/master/src/printf/printf.h -O $(INCLUDE_DIR)/printf/printf.h
+	@wget https://raw.githubusercontent.com/eyalroz/printf/refs/heads/master/src/printf/printf.c -O $(INCLUDE_DIR)/printf/printf.c
 
 # Emulate OS in QEMU
 run: $(BUILD_DIR)/$(OS_NAME).iso
@@ -83,11 +98,21 @@ $(BUILD_DIR)/%.cpp.o: %.cpp
 	@mkdir -p $(dir $@)
 	@echo "[CXX] $<" && $(CXX) $(CXXFLAGS) -c $< -o $@
 
+$(BUILD_DIR)/%.c.o: %.c
+	@mkdir -p $(dir $@)
+	@echo "[CC] $<" && $(CC) $(CFLAGS) -c $< -o $@
+
 $(BUILD_DIR)/%.asm.o: %.asm
 	@mkdir -p $(dir $@)
 	@echo "[AS] $<" && $(AS) $(ASFLAGS) $< -o $@
 
+$(BUILD_DIR)/%.sfn.o: %.sfn
+	@mkdir -p $(dir $@)
+	@$(LD) -r -b binary $< -o $@
+
 # Clean everything
-.PHONY: clean
+.PHONY: cleanDeps clean
+cleanDeps:
+	@rm -rf $(addprefix $(INCLUDE_DIR)/, limine printf/printf.h printf/printf.c)
 clean:
 	@rm -rf $(BUILD_DIR)
