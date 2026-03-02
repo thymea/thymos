@@ -15,7 +15,7 @@ AS := nasm
 CXXFLAGS := -I $(INCLUDE_DIR) -I $(SRC_DIR) -target $(ARCH)-elf -std=c++26 -Wall -Wextra -Werror -pedantic-errors \
 			-m64 -mabi=sysv -mno-80387 -mno-sse -mno-sse2 -mno-red-zone -mcmodel=kernel \
 			-fno-builtin -fno-stack-protector -fno-stack-protector -fno-lto -fno-PIC -fno-exceptions -fno-rtti \
-			-ffreestanding -ffunction-sections -fdata-sections
+			-ffreestanding -ffunction-sections -fdata-sections -fsanitize=address -fsanitize=undefined
 LDFLAGS := -nostdlib -static -z max-page-size=0x1000
 
 # Find all source files
