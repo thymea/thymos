@@ -14,14 +14,23 @@
     devShells = forEachSystem (system: {
       default = pkgs.${system}.mkShellNoCC {
         nativeBuildInputs = with pkgs.${system}; [
-					pkgsCross.x86_64-embedded.stdenv.cc
-					gcc
+					# Compiler and assembler
+					llvmPackages.clang-unwrapped
+					gcc # Only to build Limine
 					nasm
+
+					# Emulator
 					qemu
+
+					# For creating the ISO
+					xorriso
+
+					# For fetching dependencies
+					git wget
+
+					# Extra dev tools
 					clang-tools
 					compiledb
-					xorriso
-					git wget
 				];
       };
     });

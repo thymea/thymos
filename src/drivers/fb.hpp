@@ -1,7 +1,7 @@
 #pragma once
 
 // Freestanding headers
-#include <cstddef>
+#include <stddef.h>
 
 // Limine
 #include <limine/limine.h>
@@ -12,7 +12,6 @@
 class Framebuffer {
 	public:
 		Framebuffer(void);
-		void drawLine(void);
 	private:
 		limine_framebuffer *fb {nullptr};
 };

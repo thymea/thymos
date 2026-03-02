@@ -1,6 +1,7 @@
-OS_NAME := thymos
+OS_NAME ?= thymos
 ARCH ?= x86_64
 
+# Directories
 SRC_DIR := src
 INCLUDE_DIR := include
 LIMINE_DIR := $(INCLUDE_DIR)/limine
@@ -8,17 +9,20 @@ BUILD_DIR := build
 ISO_DIR := $(BUILD_DIR)/isodir/$(ARCH)
 
 # Toolchain
-CXX := $(ARCH)-elf-g++
-LD := $(ARCH)-elf-ld
+CXX := clang++
+LD := clang++
 AS := nasm
-CXXFLAGS := -I $(INCLUDE_DIR) -I $(SRC_DIR) -std=c++26 -Wall -Werror -Wextra -Wpedantic \
-			-ffreestanding -fno-stack-protector -fno-stack-protector -fno-lto -fno-PIC -ffunction-sections -fdata-sections -fno-exceptions -fno-rtti \
-			-m64 -mabi=sysv -mno-80387 -mno-sse -mno-sse2 -mno-red-zone -mcmodel=kernel
+CXXFLAGS := -I $(INCLUDE_DIR) -I $(SRC_DIR) -target $(ARCH)-elf -std=c++26 -Wall -Wextra -Werror -pedantic-errors \
+			-m64 -mabi=sysv -mno-80387 -mno-sse -mno-sse2 -mno-red-zone -mcmodel=kernel \
+			-fno-builtin -fno-stack-protector -fno-stack-protector -fno-lto -fno-PIC -fno-exceptions -fno-rtti \
+			-ffreestanding -ffunction-sections -fdata-sections
 LDFLAGS := -nostdlib -static -z max-page-size=0x1000
 
+# Find all source files
 SRCS := $(shell find $(SRC_DIR) -name "*.cpp")
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 
+# Architecture specific
 ifeq ($(ARCH), x86_64)
 	CXXFLAGS += -march=x86-64
 	ASFLAGS := -f elf64
@@ -70,6 +74,7 @@ $(BUILD_DIR)/$(OS_NAME).iso: limine.conf kernel
 	@echo "------------------------"
 	@echo "[OK] $@ created"
 
+# Kernel
 kernel: $(SRC_DIR)/arch/$(ARCH)/linker.ld $(OBJS)
 	@echo "[LD] $<" && $(LD) $(LDFLAGS) -T $< $(OBJS) -o $(BUILD_DIR)/$(OS_NAME)
 
@@ -85,4 +90,4 @@ $(BUILD_DIR)/%.asm.o: %.asm
 # Clean everything
 .PHONY: clean
 clean:
-	@rm -rf $(BUILD_DIR) $(INCLUDE_DIR)
+	@rm -rf $(BUILD_DIR)

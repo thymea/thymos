@@ -1,5 +1,5 @@
 // Freestanding headers
-#include <cstddef>
+#include <stddef.h>
 
 // Limine
 #include <limine/limine.h>
@@ -25,7 +25,6 @@ extern "C" void kmain(void) {
 
 	// Framebuffer
 	Framebuffer fb {};
-	fb.drawLine();
 
 	// Halt system
 	utils::hlt();

@@ -8,16 +8,12 @@ static volatile struct limine_framebuffer_request fbRequest = {
 	.response = nullptr,
 };
 
-// Initialize framebuffer driver
-Framebuffer::Framebuffer(void) {
-	// Ensure we have a framebuffer and fetch the first available one
-	if(fbRequest.response == nullptr || fbRequest.response->framebuffer_count < 1) utils::hlt();
-	this->fb = fbRequest.response->framebuffers[0];
-}
+// Framebuffer pointer
+volatile uint32_t *fbPtr {nullptr};
 
-void Framebuffer::drawLine(void) {
-	for (std::size_t i = 0; i < 100; i++) {
-        volatile uint32_t *fb_ptr = (volatile uint32_t *)this->fb->address;
-        fb_ptr[i * (this->fb->pitch / 4) + i] = 0xffffff;
-    }
+// Initialize framebuffer driver
+Framebuffer::Framebuffer(void) : fb(fbRequest.response->framebuffers[0]) {
+	// Ensure we have a framebuffer and fetch the first available one
+	if(this->fb == nullptr || fbRequest.response->framebuffer_count < 1) utils::hlt();
+	fbPtr = static_cast<volatile uint32_t *>(this->fb->address);
 }
