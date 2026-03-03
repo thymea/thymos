@@ -15,7 +15,7 @@
       default = pkgs.${system}.mkShellNoCC {
         nativeBuildInputs = with pkgs.${system}; [
 					# Compiler and assembler
-					pkgsCross.x86_64-embedded.stdenv.cc
+					pkgsCross.x86_64-embedded.buildPackages.gcc
 					gcc # Only to build Limine
 					nasm
 

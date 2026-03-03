@@ -13,17 +13,23 @@
 #include <printf/printf.h>
 
 // OS
-#include <utils.hpp>
+#include <arch/common.hpp>
 
 typedef struct {
 	ssfn_font_t *font;
 	uint8_t width, height;
-} font_t;
+} Font_t;
 
-class Framebuffer {
-	public:
-		Framebuffer(const font_t &font, uint32_t bgColor, uint32_t fgColor);
-		void clear(void);
-	private:
-		limine_framebuffer *fb {nullptr};
-};
+namespace Drivers {
+	class Framebuffer {
+		public:
+			void init(ssfn_font_t *font, uint32_t bgColor, uint32_t fgColor);
+			void clear(void);
+
+			// Getters
+			limine_framebuffer *getFramebuffer(void);
+
+		private:
+			limine_framebuffer *fb;
+	};
+}

@@ -6,7 +6,12 @@
 
 // OS
 #include <utils.hpp>
+#include <arch/common.hpp>
 #include <drivers/fb.hpp>
+
+#define BG_COLOR 0x000000
+#define FG_COLOR 0x00aa00
+#define TAB_SPACES 4
 
 // Limine base revision
 __attribute__((used, section(".limine_requests")))
@@ -29,38 +34,82 @@ static volatile struct limine_firmware_type_request firmwareTypeRequest = {
 // Font
 extern ssfn_font_t _binary_fonts_unifont_sfn_start;
 
+// Framebuffer
+static Drivers::Framebuffer fb {};
+const static Font_t font {
+	.font = &_binary_fonts_unifont_sfn_start,
+	.width = 16,
+	.height = 16,
+};
+
 // Kernel entry point
 extern "C" void kmain(void) {
 	// Ensure Limine base revision is supported
-	if(LIMINE_BASE_REVISION_SUPPORTED(limineBaseRev) == false) utils::hlt();
-	struct limine_firmware_type_response *firmwareType = firmwareTypeRequest.response;
+	if(LIMINE_BASE_REVISION_SUPPORTED(limineBaseRev) == false) CPU::Utils::hlt();
 
-	// Framebuffer
-	Framebuffer fb {{
-		.font = &_binary_fonts_unifont_sfn_start,
-		.width = 8,
-		.height = 8,
-	}, 0x000000, 0xffffff};
+	// Initialize the framebuffer
+	fb.init(font.font, BG_COLOR, FG_COLOR);
+	printf("[FRAMEBUFFER] Initialized framebuffer\n");
+	printf("[FRAMEBUFFER] Width -> %lu\n", fb.getFramebuffer()->width);
+	printf("[FRAMEBUFFER] Height -> %lu\n", fb.getFramebuffer()->height);
+	printf("[FRAMEBUFFER] Pitch -> %lu\n", fb.getFramebuffer()->pitch);
+	printf("[FRAMEBUFFER] Bits Per Pixel -> %hu\n", fb.getFramebuffer()->bpp);
+	printf("\n");
 
-	ssfn_dst.bg = 0x00aa00;
-	fb.clear();
+	// Initialize CPU stuff
+#ifdef ARCH_x86_64
+	CPU::GDT gdt;
+	gdt.init();
+	printf("[CPU] Initialized GDT\n");
+#endif
+	printf("\n");
 
 	// Display firmware type
+	struct limine_firmware_type_response *firmwareType = firmwareTypeRequest.response;
 	switch(firmwareType->firmware_type) {
 		case 0:
-			printf("[FIRMWARE TYPE] x86 BIOS\n");
+			printf("[FIRMWARE] x86 BIOS\n");
 			break;
 		case 1:
-			printf("[FIRMWARE TYPE] 32-BITS UEFI\n");
+			printf("[FIRMWARE] 32-BITS UEFI\n");
 			break;
 		case 2:
-			printf("[FIRMWARE TYPE] 64-BITS UEFI\n");
+			printf("[FIRMWARE] 64-BITS UEFI\n");
 			break;
 		case 3:
-			printf("[FIRMWARE TYPE] SBI\n");
+			printf("[FIRMWARE] SBI\n");
 			break;
 	}
 
 	// Halt system
-	utils::hlt();
+	CPU::Utils::hlt();
+}
+
+// Handle printing characters for `printf` and all
+void putchar_(char c) {
+	// Figure out if character position will be outside screen
+	bool isYOffScreen {(ssfn_dst.y + font.height) > ssfn_dst.h};
+	bool isXOffScreen {(ssfn_dst.x + font.width) > ssfn_dst.w};
+
+	// Handle characters
+	switch(c) {
+		// Newline
+		case '\n':
+			ssfn_dst.x = 0;
+			if(isYOffScreen) return;
+			else ssfn_dst.y += font.height;
+			break;
+
+		/// Tabs
+		case '\t':
+			for(uint8_t i = 0; i < TAB_SPACES; i++) putchar_(' ');
+			break;
+		
+		// Normal character
+		default:
+			if(isYOffScreen) fb.clear();
+			else if(isXOffScreen) putchar_('\n');
+			else ssfn_putc(c);
+			break;
+	}
 }

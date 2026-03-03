@@ -19,13 +19,21 @@ COMMON_FLAGS := -I $(INCLUDE_DIR) -I $(SRC_DIR) -Wall -Wextra -Werror -pedantic-
 			-fno-builtin -fno-stack-protector -fno-stack-protector -fno-lto -fno-PIE -fno-PIC -fno-exceptions \
 			-ffreestanding -ffunction-sections -fdata-sections -DPRINTF_INCLUDE_CONFIG_H=1
 CFLAGS := $(COMMON_FLAGS)
-CXXFLAGS := $(COMMON_FLAGS) -std=c++26 -Wno-register -fno-rtti
+CXXFLAGS := $(COMMON_FLAGS) -std=c++26 -Wno-register -fno-rtti -DARCH_$(ARCH)
 LDFLAGS := -nostdlib -static -z max-page-size=0x1000
 
 # Find all source files
 SRCS := $(shell find $(SRC_DIR) -name "*.cpp") $(INCLUDE_DIR)/printf/printf.c
 FONTS := $(shell find $(FONTS_DIR) -name "*.sfn")
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o) $(FONTS:%=$(BUILD_DIR)/%.o)
+
+# Debug/Release
+RELEASE ?= 0
+ifeq ($(RELEASE), 1)
+	COMMON_FLAGS += -O2 -DNDEBUG
+else
+	COMMON_FLAGS += -ggdb
+endif
 
 # Architecture specific
 ifeq ($(ARCH), x86_64)

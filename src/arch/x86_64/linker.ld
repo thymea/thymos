@@ -1,6 +1,9 @@
 /* Output format */
 OUTPUT_FORMAT(elf64-x86-64)
 
+/* Ensure all files being linked together are actually 64-bits */
+OUTPUT_ARCH(i386:x86-64)
+
 /* OS Entry point */
 ENTRY(kmain)
 

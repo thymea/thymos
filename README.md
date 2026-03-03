@@ -10,10 +10,10 @@ $${\color{red}a \space simple \space x86 \textunderscore 64 \space operating \sp
 </div>
 
 ## Build Dependencies
-- [Clang](https://clang.llvm.org/) - To compile C++. It's natively a cross compiler and so it's easy to make it cross compile just by adding a target flag so you can just install it and build thymos just fine.
+- [GCC cross-compiler](https://wiki.osdev.org/GCC_Cross-Compiler) - C/C++ compiler.
 - [NASM](https://www.nasm.us/) - Assembler.
 - [QEMU](https://www.qemu.org/) - Emulator.
-- [Xorriso](https://www.gnu.org/software/xorriso/) - For creating the ISO. Might be available in `libisoburn` package in certain software repos e.g. Nix packages.
+- [Xorriso](https://www.gnu.org/software/xorriso/) - For creating the bootable ISO. Found in `libisoburn` package in certain software repos e.g. Nix packages.
 - [Git](https://git-scm.com/) and [wget](https://www.gnu.org/software/wget/) - To fetch dependencies.
 
 > [!NOTE]
