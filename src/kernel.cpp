@@ -49,18 +49,17 @@ extern "C" void kmain(void) {
 
 	// Initialize the framebuffer
 	fb.init(font.font, BG_COLOR, FG_COLOR);
-	printf("[FRAMEBUFFER] Initialized framebuffer\n");
-	printf("[FRAMEBUFFER] Width -> %lu\n", fb.getFramebuffer()->width);
-	printf("[FRAMEBUFFER] Height -> %lu\n", fb.getFramebuffer()->height);
-	printf("[FRAMEBUFFER] Pitch -> %lu\n", fb.getFramebuffer()->pitch);
-	printf("[FRAMEBUFFER] Bits Per Pixel -> %hu\n", fb.getFramebuffer()->bpp);
+	printf("[FRAMEBUFFER] INITIALIZED\n");
+	printf("[FRAMEBUFFER] WIDTH -> %lu\n", fb.getFramebuffer()->width);
+	printf("[FRAMEBUFFER] HEIGHT -> %lu\n", fb.getFramebuffer()->height);
+	printf("[FRAMEBUFFER] PITCH -> %lu\n", fb.getFramebuffer()->pitch);
+	printf("[FRAMEBUFFER] COLOR DEPTH -> %hu\n", fb.getFramebuffer()->bpp);
 	printf("\n");
 
 	// Initialize CPU stuff
 #ifdef ARCH_x86_64
-	CPU::GDT gdt;
-	gdt.init();
-	printf("[CPU] Initialized GDT\n");
+	CPU::gdtInit();
+	printf("[CPU] GDT INITIALIZED\n");
 #endif
 	printf("\n");
 

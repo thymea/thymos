@@ -23,7 +23,7 @@ CXXFLAGS := $(COMMON_FLAGS) -std=c++26 -Wno-register -fno-rtti -DARCH_$(ARCH)
 LDFLAGS := -nostdlib -static -z max-page-size=0x1000
 
 # Find all source files
-SRCS := $(shell find $(SRC_DIR) -name "*.cpp") $(INCLUDE_DIR)/printf/printf.c
+SRCS := $(shell find $(SRC_DIR) -name "*.cpp" -or -name "*.s") $(INCLUDE_DIR)/printf/printf.c
 FONTS := $(shell find $(FONTS_DIR) -name "*.sfn")
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o) $(FONTS:%=$(BUILD_DIR)/%.o)
 
@@ -33,6 +33,7 @@ ifeq ($(RELEASE), 1)
 	COMMON_FLAGS += -O2 -DNDEBUG
 else
 	COMMON_FLAGS += -ggdb
+	CXXFLAGS += -DDEBUG
 endif
 
 # Architecture specific
@@ -110,7 +111,7 @@ $(BUILD_DIR)/%.c.o: %.c
 	@mkdir -p $(dir $@)
 	@echo "[CC] $<" && $(CC) $(CFLAGS) -c $< -o $@
 
-$(BUILD_DIR)/%.asm.o: %.asm
+$(BUILD_DIR)/%.s.o: %.s
 	@mkdir -p $(dir $@)
 	@echo "[AS] $<" && $(AS) $(ASFLAGS) $< -o $@
 

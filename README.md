@@ -23,13 +23,13 @@ $${\color{red}a \space simple \space x86 \textunderscore 64 \space operating \sp
 - `make fetchDeps` - Fetch all libraries e.g. Limine. `git` and `wget` are used for this. Please run this before trying to build thymos.
 - `make` - Build the kernel and output a bootable ISO.
 - `make kernel` - Just build the kernel.
-- `make run` - Emulate emexOS using QEMU.
+- `make run` - Emulate OS using QEMU.
 - `make clean` - Clean up all build outputs.
 
 <div align="center">
 	<h2>Contributors</h2>
 	<a href="https://github.com/thymea/thymos/graphs/contributors">
-		<img src="https://contrib.rocks/image?repo=thymea/thymos" />
+		<img src="https://contrib.rocks/image?repo=thymea/thymos"/>
 	</a>
 	<p>Made with [contrib.rocks](https://contrib.rocks).</p>
 </div>
