@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable-small";
     systems.url = "github:nix-systems/default";
   };
   outputs = inputs: let
@@ -15,7 +15,7 @@
       default = pkgs.${system}.mkShellNoCC {
         nativeBuildInputs = with pkgs.${system}; [
 					# Compiler and assembler
-					pkgsCross.x86_64-embedded.buildPackages.gcc
+					pkgsCross.x86_64-embedded.stdenv.cc
 					gcc # Only to build Limine
 					nasm
 

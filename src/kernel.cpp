@@ -6,8 +6,13 @@
 
 // OS
 #include <utils.hpp>
-#include <arch/common.hpp>
 #include <drivers/fb.hpp>
+
+// Architecture specifics
+#include <arch/common.hpp>
+#ifdef ARCH_x86_64
+	static CPU::Idt idt;
+#endif
 
 #define BG_COLOR 0x000000
 #define FG_COLOR 0x00aa00
@@ -60,6 +65,8 @@ extern "C" void kmain(void) {
 #ifdef ARCH_x86_64
 	CPU::gdtInit();
 	printf("[CPU] GDT INITIALIZED\n");
+	idt.init();
+	printf("[CPU] IDT INITIALIZED\n");
 #endif
 	printf("\n");
 
@@ -79,6 +86,8 @@ extern "C" void kmain(void) {
 			printf("[FIRMWARE] SBI\n");
 			break;
 	}
+
+	asm("int $0");
 
 	// Halt system
 	CPU::Utils::hlt();
@@ -111,4 +120,13 @@ void putchar_(char c) {
 			else ssfn_putc(c);
 			break;
 	}
+}
+
+// Interrupt handler
+extern "C" [[noreturn]] void interruptHandler(void) {
+	ssfn_dst.fg = 0xff0000;
+	printf("\nSomething happened idk man\n");
+
+	// Halt the system
+	CPU::Utils::hlt();
 }

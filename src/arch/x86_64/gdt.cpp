@@ -21,14 +21,6 @@ typedef struct __attribute__((packed)) {
 	uint32_t reserved;
 } TssEntry_t;
 
-// For debugging
-#ifdef DEBUG
-	// Ensure both structs are actually properly packed and the right size
-	static_assert(sizeof(Gdtr_t) == 10, "GDT descriptor structure isn't 10 bytes");
-	static_assert(sizeof(GdtEntry_t) == 8, "GDT segment descriptor structure isn't 8 bytes");
-	static_assert(sizeof(TssEntry_t) == 16, "TSS segment descriptor structure isn't 16 bytes");
-#endif
-
 static Gdtr_t gdtr {};
 static GdtEntry_t gdt[5] {};
 
@@ -44,28 +36,30 @@ static void setEntry(uint32_t entryNum, uint8_t access, uint8_t gran) {
 }
 
 // Load the GDT
-void CPU::gdtInit(void) {
-	// Disable interrupts
-	__asm__ volatile ("cli");
+namespace CPU {
+	void gdtInit(void) {
+		// Disable interrupts
+		__asm__ volatile ("cli");
 
-	// Initialize GDT descriptor
-	gdtr.offset = reinterpret_cast<uint64_t>(&gdt[0]);
-	gdtr.size = sizeof(gdt) - 1;
+		// Initialize GDT descriptor
+		gdtr.offset = reinterpret_cast<uint64_t>(&gdt[0]);
+		gdtr.size = sizeof(gdt) - 1;
 
-	// Null segment descriptor
-	setEntry(0, 0, 0);
+		// Null segment descriptor
+		setEntry(0, 0, 0);
 
-	// Kernel code and data segment descriptors
-	setEntry(1, 0x9A, 0x20);
-	setEntry(2, 0x92, 0x00);
+		// Kernel code and data segment descriptors
+		setEntry(1, 0x9A, 0x20);
+		setEntry(2, 0x92, 0x00);
 
-	// User code and data segment descriptors
-	setEntry(3, 0xFA, 0x20);
-	setEntry(4, 0xF2, 0x00);
+		// User code and data segment descriptors
+		setEntry(3, 0xFA, 0x20);
+		setEntry(4, 0xF2, 0x00);
 
-	// Load GDT
-	loadGDT(&gdtr);
+		// Load GDT
+		loadGDT(&gdtr);
 
-	// Enable interrupts
-	__asm__ volatile ("sti");
+		// Enable interrupts
+		__asm__ volatile ("sti");
+	}
 }
