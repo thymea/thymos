@@ -1,4 +1,4 @@
-ld = find_program('ld', required: true)
+ld = find_program(arch + '-elf-ld', required: true)
 
 sfnFiles = run_command(
 	'find', './', '-name', '*.sfn', '-type', 'f',

@@ -1,5 +1,8 @@
 #include <arch/x86_64/gdt.hpp>
 
+// Freestanding
+#include <cstdint>
+
 // GDTR - GDT descriptor
 typedef struct __attribute__((packed)) {
 	uint16_t size;
@@ -36,7 +39,7 @@ static void setEntry(uint32_t entryNum, uint8_t access, uint8_t gran) {
 }
 
 // Load the GDT
-namespace CPU {
+namespace cpu {
 	void gdtInit(void) {
 		// Disable interrupts
 		__asm__ volatile ("cli");

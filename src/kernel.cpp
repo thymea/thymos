@@ -1,6 +1,3 @@
-// Freestanding headers
-#include <stddef.h>
-
 // Limine
 #include <limine/limine.h>
 
@@ -11,7 +8,7 @@
 // Architecture specifics
 #include <arch/common.hpp>
 #ifdef ARCH_x86_64
-	static CPU::Idt idt;
+	static cpu::Idt idt;
 #endif
 
 #define BG_COLOR 0x000000
@@ -40,7 +37,7 @@ static volatile struct limine_firmware_type_request firmwareTypeRequest = {
 extern ssfn_font_t _binary____fonts___unifont_sfn_start;
 
 // Framebuffer
-static Drivers::Framebuffer fb {};
+static drivers::Framebuffer fb {};
 const static Font_t font {
 	.font = &_binary____fonts___unifont_sfn_start,
 	.width = 16,
@@ -50,7 +47,7 @@ const static Font_t font {
 // Kernel entry point
 extern "C" void kmain(void) {
 	// Ensure Limine base revision is supported
-	if(LIMINE_BASE_REVISION_SUPPORTED(limineBaseRev) == false) CPU::Utils::hlt();
+	if(LIMINE_BASE_REVISION_SUPPORTED(limineBaseRev) == false) cpu::utils::hlt();
 
 	// Initialize the framebuffer
 	fb.init(font.font, BG_COLOR, FG_COLOR);
@@ -63,7 +60,7 @@ extern "C" void kmain(void) {
 
 	// Initialize CPU stuff
 #ifdef ARCH_x86_64
-	CPU::gdtInit();
+	cpu::gdtInit();
 	printf("[CPU] GDT INITIALIZED\n");
 	idt.init();
 	printf("[CPU] IDT INITIALIZED\n");
@@ -87,10 +84,10 @@ extern "C" void kmain(void) {
 			break;
 	}
 
-	asm("int $0");
+	asm("int $4");
 
 	// Halt system
-	CPU::Utils::hlt();
+	cpu::utils::hlt();
 }
 
 // Handle printing characters for `printf` and all
@@ -123,10 +120,10 @@ void putchar_(char c) {
 }
 
 // Interrupt handler
-extern "C" [[noreturn]] void interruptHandler(void) {
+extern "C" [[noreturn]] void interruptHandler(uint8_t intNum) {
 	ssfn_dst.fg = 0xff0000;
-	printf("\nSomething happened idk man\n");
+	printf("\nInterrupt Num is %d\n", intNum);
 
 	// Halt the system
-	CPU::Utils::hlt();
+	cpu::utils::hlt();
 }

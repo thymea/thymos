@@ -3,7 +3,7 @@
 #include <arch/x86_64/gdt.hpp>
 #include <arch/x86_64/idt.hpp>
 
-namespace CPU::Utils {
+namespace cpu::utils {
 	// Disable system interrupts and halt system indefinitely
 	__attribute__((noreturn)) void hlt(void);
 

@@ -1,5 +1,8 @@
 #include <arch/x86_64/idt.hpp>
 
+// Freestanding
+#include<cstdint>
+
 // IDT register
 typedef struct __attribute__((packed)) {
 	uint16_t limit;
@@ -37,7 +40,7 @@ static void idtSetDesc(uint8_t entryNum, void *isr, uint8_t flags) {
 }
 
 // Constructor
-namespace CPU {
+namespace cpu {
 	void Idt::init(void) {
 		// IDT descriptor
 		idtr.base = reinterpret_cast<uintptr_t>(&idt[0]);

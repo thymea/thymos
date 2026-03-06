@@ -3,14 +3,12 @@ project(
 	['c', 'cpp'],
 	version: '0.0.1',
 	default_options: [
+		'backend=ninja',
 		'cpp_std=c++26',
 		'cpp_rtti=false',
-
 		'c_std=c23',
-
 		'warning_level=3',
 		'werror=true',
-
 		'buildtype=debugoptimized',
 	],
 )
@@ -76,6 +74,8 @@ add_project_link_arguments(
 	'-static',
 	'-z',
 	'max-page-size=0x1000',
+	'-z',
+	'noexecstack',
 	language: ['c', 'cpp'],
 )
 
@@ -89,7 +89,6 @@ iso = custom_target(
 	'iso',
 	input: [kernel],
 	output: osName + '.iso',
-	build_by_default : true,
 	command: [
 		'bash', files('scripts/mkISO.sh'),
 

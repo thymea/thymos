@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cstdint>
-
-namespace CPU {
+namespace cpu {
 	void gdtInit(void);
 }
