@@ -14,26 +14,28 @@
     devShells = forEachSystem (system: {
       default = pkgs.${system}.mkShellNoCC {
         nativeBuildInputs = with pkgs.${system}; [
-					meson
-					ninja
+          # Build system
+          meson
+          ninja
 
-					# Compiler and assembler
-					pkgsCross.x86_64-embedded.stdenv.cc
-					gcc # Only to build Limine
-					nasm
+          # Compiler and assembler
+          pkgsCross.x86_64-embedded.stdenv.cc
+          gcc # Only to build Limine
+          nasm
 
-					# Emulator
-					qemu
+          # Emulator
+          qemu
 
-					# For creating the ISO
-					xorriso
+          # To create bootable ISOs
+          xorriso
 
-					# For fetching dependencies
-					git wget
+          # For fetching dependencies
+          git
+          wget
 
-					# Extra dev tools
-					compiledb
-				];
+          # Extra dev tools
+          compiledb
+        ];
       };
     });
   };

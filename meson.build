@@ -3,12 +3,15 @@ project(
 	['c', 'cpp'],
 	version: '0.0.1',
 	default_options: [
-		'cpp_std = c++26',
-		'c_std = c23',
-		# 'warning_level = 3',
-		# 'werror = true',
-		# 'buildtype = debugoptimize',
-		'b_staticpic=false',
+		'cpp_std=c++26',
+		'cpp_rtti=false',
+
+		'c_std=c23',
+
+		'warning_level=3',
+		'werror=true',
+
+		'buildtype=debugoptimized',
 	],
 )
 
@@ -49,7 +52,6 @@ commonFlags = [
 	'-DPRINTF_INCLUDE_CONFIG_H=1',
 ]
 cxxFlags = commonFlags + [
-	'-fno-rtti',
 	'-fno-exceptions',
 
 	'-Wno-c++20-extensions',
@@ -82,12 +84,6 @@ subdir('include')
 subdir('fonts')
 subdir('src')
 
-# Fetch dependencies
-fetchDeps = run_target(
-	'fetchDeps',
-	command: ['bash', files('scripts/fetchDeps.sh')],
-)
-
 # Create bootable ISO
 iso = custom_target(
 	'iso',
@@ -110,7 +106,7 @@ iso = custom_target(
 qemu = find_program('qemu-system-' + arch, required: false)
 qemuFlags = ['-m', '512', '-cdrom', 'isodir/' + arch + '/' + osName + '.iso']
 if qemu.found()
-	run_target(
+    run_target(
 		'run',
 		command: [qemu, qemuFlags],
 		depends: [iso],
