@@ -1,4 +1,5 @@
 // Limine
+#include "arch/x86_64/idt.hpp"
 #include <limine/limine.h>
 
 // OS
@@ -121,8 +122,14 @@ void putchar_(char c) {
 
 // Interrupt handler
 extern "C" [[noreturn]] void interruptHandler(uint8_t intNum) {
-	ssfn_dst.fg = 0xff0000;
-	printf("\nInterrupt Num is %d\n", intNum);
+	// CPU exceptions
+	if(intNum < 32) {
+		ssfn_dst.fg = 0xff0000;
+#ifdef ARCH_x86_64
+		printf("\n[CPU EXCEPTION OCCURRED] %s\n", idt.cpuExceptionMsgs[intNum]);
+#endif
+		printf("[INTERRUPT NUMBER] %d\n", intNum);
+	}
 
 	// Halt the system
 	cpu::utils::hlt();

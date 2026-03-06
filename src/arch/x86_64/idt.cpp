@@ -20,12 +20,15 @@ typedef struct __attribute__((packed)) {
 	uint32_t reserved;
 } IdtEntry_t;
 
+// Interrupt Service Routines (ISRs) - Defined in Assembly
 extern void *isrStubTable[];
 
+// IDT - Aligned for performance
 __attribute__((aligned(0x10)))
 static IdtEntry_t idt[256];
 static Idtr_t idtr;
 
+// Create an entry in the IDT
 static void idtSetDesc(uint8_t entryNum, void *isr, uint8_t flags) {
 	IdtEntry_t *entry {&idt[entryNum]};
 	uint64_t isrNum {static_cast<uint64_t>(reinterpret_cast<uintptr_t>(isr))};

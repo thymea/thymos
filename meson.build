@@ -1,7 +1,7 @@
 project(
 	'thymos',
 	['c', 'cpp'],
-	version: '0.0.1',
+	version: '0.0.2',
 	default_options: [
 		'backend=ninja',
 		'cpp_std=c++26',
@@ -22,7 +22,7 @@ cc = meson.get_compiler('c')
 cxx = meson.get_compiler('cpp')
 
 # Directories
-incDirs = include_directories('include', 'src')
+incDirs = [include_directories('include', 'src')]
 
 # Common flags applied to both C/C++ files
 commonFlags = [

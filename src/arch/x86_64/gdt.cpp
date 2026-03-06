@@ -28,10 +28,9 @@ static Gdtr_t gdtr {};
 static GdtEntry_t gdt[5] {};
 
 // Assembly functions
-extern "C" {
-	extern void loadGDT(Gdtr_t *gdtr);
-}
+extern "C" {extern void loadGDT(Gdtr_t *gdtr);}
 
+// Create an entry in the GDT
 static void setEntry(uint32_t entryNum, uint8_t access, uint8_t gran) {
 	GdtEntry_t *entry {&gdt[entryNum]};
 	entry->access = access;
