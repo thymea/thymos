@@ -1,0 +1,14 @@
+option(
+	'arch',
+	type: 'combo',
+	value: 'x86_64',
+	choices: ['x86_64'],
+	description: 'Target architecture to build for',
+)
+
+option(
+	'os_name',
+	type: 'string',
+	value: 'thymos',
+	description: 'Kernel binary and ISO output file name',
+)

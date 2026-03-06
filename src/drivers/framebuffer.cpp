@@ -1,5 +1,5 @@
 #define SSFN_CONSOLEBITMAP_TRUECOLOR
-#include <drivers/fb.hpp>
+#include <drivers/framebuffer.hpp>
 
 // Framebuffer request
 __attribute__((used, section(".limine_requests")))

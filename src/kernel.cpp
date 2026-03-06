@@ -6,7 +6,7 @@
 
 // OS
 #include <utils.hpp>
-#include <drivers/fb.hpp>
+#include <drivers/framebuffer.hpp>
 
 // Architecture specifics
 #include <arch/common.hpp>
@@ -37,12 +37,12 @@ static volatile struct limine_firmware_type_request firmwareTypeRequest = {
 };
 
 // Font
-extern ssfn_font_t _binary_fonts_unifont_sfn_start;
+extern ssfn_font_t _binary____fonts___unifont_sfn_start;
 
 // Framebuffer
 static Drivers::Framebuffer fb {};
 const static Font_t font {
-	.font = &_binary_fonts_unifont_sfn_start,
+	.font = &_binary____fonts___unifont_sfn_start,
 	.width = 16,
 	.height = 16,
 };

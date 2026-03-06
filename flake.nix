@@ -14,6 +14,9 @@
     devShells = forEachSystem (system: {
       default = pkgs.${system}.mkShellNoCC {
         nativeBuildInputs = with pkgs.${system}; [
+					meson
+					ninja
+
 					# Compiler and assembler
 					pkgsCross.x86_64-embedded.stdenv.cc
 					gcc # Only to build Limine
