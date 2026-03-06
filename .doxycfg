@@ -1,0 +1,14 @@
+PROJECT_NAME = "thymos"
+PROJECT_NUMBER = 0.0.2
+PROJECT_BRIEF = "a simple x86 64-bit operating system written in c++"
+
+INPUT = src/
+RECURSIVE = YES
+OUTPUT_DIRECTORY = ./docs
+
+SOURCE_BROWSER = YES
+INLINE_SOURCES = YES
+GENERATE_TREEVIEW = YES
+GENERATE_LATEX = NO
+
+FILE_PATTERNS = *.hpp *.cpp

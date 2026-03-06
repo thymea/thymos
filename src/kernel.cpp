@@ -125,9 +125,9 @@ extern "C" [[noreturn]] void interruptHandler(uint8_t intNum) {
 	// CPU exceptions
 	if(intNum < 32) {
 		ssfn_dst.fg = 0xff0000;
-#ifdef ARCH_x86_64
-		printf("\n[CPU EXCEPTION OCCURRED] %s\n", idt.cpuExceptionMsgs[intNum]);
-#endif
+		#ifdef ARCH_x86_64
+			printf("\n[CPU EXCEPTION OCCURRED] %s\n", idt.cpuExceptionMsgs[intNum]);
+		#endif
 		printf("[INTERRUPT NUMBER] %d\n", intNum);
 	}
 
