@@ -7,7 +7,10 @@
 #include <limine/limine.h>
 
 // Text rendering
+#pragma push_macro("__cplusplus")
+#undef __cplusplus
 #include <ssfn.h>
+#pragma pop_macro("__cplusplus")
 
 // Tiny printf implementation
 #include <printf/printf.h>
