@@ -1,0 +1,55 @@
+# Simple workflow for deploying static content to GitHub Pages
+name: Deploy Doxygen docs site
+
+# To allow deployment to Github Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment
+# Skip runs queued between the run in-progress and latest queued
+# But don't cancel in-progress runs as we want to allow these production deployments to complete
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+# When this workflow is triggered
+on:
+  # When anything inside `docs` is changed by a push or pull request
+  push:
+    paths:
+      - 'docs/**'
+  pull_request:
+    paths:
+      - 'docs/**'
+
+  # Manual trigger for workflow
+  workflow_dispatch:
+
+# What this workflow does
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      # Clone this repo
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Configure Github Pages
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      # Upload docs website files
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './docs/html'
+
+      # Deploy to Github Pages
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
