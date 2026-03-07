@@ -1,5 +1,4 @@
 // Limine
-#include "arch/x86_64/idt.hpp"
 #include <limine/limine.h>
 
 // OS

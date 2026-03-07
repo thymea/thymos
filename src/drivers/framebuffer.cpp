@@ -2,7 +2,7 @@
 #include <cstddef>
 
 // OS
-#include <arch/common.hpp>
+#include <utils.hpp>
 
 #define SSFN_CONSOLEBITMAP_TRUECOLOR
 #include <drivers/framebuffer.hpp>
