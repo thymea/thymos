@@ -4,16 +4,23 @@ const std = @import("std");
 pub fn build(b: *std.Build) void {
     // Constants
     const PROJECT_NAME: []const u8 = "thymos";
-	const INCLUDE_DIR: []const u8 = "include";
+    const INCLUDE_DIR: []const u8 = "include";
 
     // Target architecture - Target is the native platform by default
     // const target = b.standardTargetOptions(.{});
-	const arch = b.option(std.Target.Cpu.Arch, "arch", "Target architecture") orelse std.Target.Cpu.Arch.x86_64;
-	const targetQuery: std.Target.Query = .{
-		.cpu_arch = arch,
-		.abi = .none,
-		.os_tag = .freestanding,
-	};
+    const arch = b.option(std.Target.Cpu.Arch, "arch", "Target architecture") orelse std.Target.Cpu.Arch.x86_64;
+    var targetQuery: std.Target.Query = .{
+        .cpu_arch = arch,
+        .abi = .none,
+        .os_tag = .freestanding,
+    };
+    switch (arch) {
+        .x86_64 => {
+            targetQuery.cpu_features_add = std.Target.x86.featureSet(&.{.soft_float});
+            targetQuery.cpu_features_sub = std.Target.x86.featureSet(&.{ .sse, .sse2 });
+        },
+        else => {},
+    }
 
     // Optimization mode - Can be either `Debug`, `ReleaseSafe`, `ReleaseFast`, or `ReleaseSmall`
     const optimize = b.standardOptimizeOption(.{});
@@ -23,29 +30,40 @@ pub fn build(b: *std.Build) void {
         .root_source_file = b.path("src/kernel.zig"),
         .target = b.resolveTargetQuery(targetQuery),
         .optimize = optimize,
-        .imports = &.{},
 
-		.code_model = .kernel,
-		.link_libc = false,
-		.link_libcpp = false,
-		.stack_check = false,
-		.stack_protector = false,
-		.unwind_tables = .none,
-		.red_zone = false,
-		.pic = false,
+        .code_model = .kernel,
+        .link_libc = false,
+        .link_libcpp = false,
+        .stack_check = false,
+        .stack_protector = false,
+        .unwind_tables = .none,
+        .red_zone = false,
+        .pic = false,
     });
-	kernelMod.addIncludePath(b.path(INCLUDE_DIR));
-	kernelMod.addCSourceFile(.{.file = b.path("src/compat.c"), .language = .c});
+    kernelMod.addIncludePath(b.path(INCLUDE_DIR));
+    kernelMod.addCSourceFile(.{
+        .language = .c,
+        .file = b.path("src/compat.c"),
+    });
+    kernelMod.addCSourceFile(.{
+        .language = .c,
+        .file = b.path(b.fmt("{s}/printf/printf.c", .{INCLUDE_DIR})),
+        .flags = &.{
+            "-DPRINTF_INCLUDE_CONFIG_H",
+        },
+    });
 
     // Binary
     const thymos = b.addExecutable(.{
         .name = PROJECT_NAME,
         .root_module = kernelMod,
-		.linkage = .static,
+        .linkage = .static,
     });
-	thymos.setLinkerScript(b.path("src/arch/x86_64/linker.ld"));
-	thymos.link_z_max_page_size = 0x1000;
-	thymos.link_gc_sections = true;
+    thymos.setLinkerScript(b.path(b.fmt("src/arch/{s}/linker.ld", .{@tagName(arch)})));
+    thymos.link_z_max_page_size = 0x1000;
+    thymos.link_function_sections = true;
+    thymos.link_data_sections = true;
+    thymos.link_gc_sections = true;
 
     // Install binary into install prefix
     b.installArtifact(thymos);
