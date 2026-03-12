@@ -8,7 +8,7 @@ const video = @import("drivers/video.zig");
 const c = root.c;
 const printf = root.printf;
 
-// Kernel entry point
+/// The kernel's entry point.
 export fn _start() callconv(.c) noreturn {
     // Ensure Limine base revision is supported
     if (!c.LIMINE_BASE_REVISION_SUPPORTED(root.limineBaseRev)) utils.halt();

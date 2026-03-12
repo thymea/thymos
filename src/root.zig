@@ -1,3 +1,5 @@
+//! This module imports a bunch of modules that are commonly used along with constants.
+
 pub const c = @cImport({
     @cInclude("limine/limine.h");
     @cInclude("ssfn.h");

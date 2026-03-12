@@ -1,3 +1,6 @@
+//! This is a basic framebuffer driver that allows us to draw some primitive shapes and text on the screen
+//! Until a proper GPU driver is loaded, the framebuffer is all there is for rendering anything.
+
 const root = @import("../root.zig");
 const utils = @import("../utils.zig");
 const colors = @import("../colors.zig");
@@ -19,7 +22,8 @@ const FONT = @embedFile("../fonts/unifont.sfn");
 const FONT_WIDTH: u8 = 8;
 const FONT_HEIGHT: u8 = 16;
 
-// Initialize the framebuffer
+/// Initialize the framebuffer by fetching the first one available. If there are none available then the OS is halted indefinitely.
+/// This function also initializes SSFN which is a library for rendering text on the screen. It uses `.sfn` font files.
 pub fn init(bgColor: u32, fgColor: u32) void {
     // Fetch the first available framebuffer
     const fbResponse: *c.limine_framebuffer_response = @ptrCast(fbRequest.response orelse utils.halt());
@@ -99,17 +103,21 @@ pub fn drawLine(xpos1: isize, ypos1: isize, xpos2: isize, ypos2: isize, color: u
 }
 
 // Handy functions
+/// Resets the text cursor position and clears the screen by drawing a rectangle that has the same color as the background over everything
 pub fn clearScreen() void {
-    // Reset cursor position and clear screen by drawing a rectangle over everything
     c.ssfn_dst.x = 0;
     c.ssfn_dst.y = 0;
     drawRect(0, 0, fb.width, fb.height, c.ssfn_dst.bg);
 }
 
-// Putchar implementation for printf
+/// Putchar implementation which is required for printf.
+/// This function is responsible for handling all special characters and drawing each character to the screen.
 export fn putchar_(char: u8) callconv(.c) void {
+	// Figure out the next cursor position
     const isXOffScreen: bool = (c.ssfn_dst.x + FONT_WIDTH) > fb.width;
     const isYOffScreen: bool = (c.ssfn_dst.y + FONT_HEIGHT) > fb.height;
+
+	// Handle special characters
     switch (char) {
         // Newline
         '\n' => {
