@@ -39,6 +39,7 @@ pub fn build(b: *std.Build) void {
         .unwind_tables = .none,
         .red_zone = false,
         .pic = false,
+        .sanitize_c = .off,
     });
     kernelMod.addIncludePath(b.path(INCLUDE_DIR));
     kernelMod.addCSourceFile(.{
@@ -60,6 +61,7 @@ pub fn build(b: *std.Build) void {
         .linkage = .static,
     });
     thymos.setLinkerScript(b.path(b.fmt("src/arch/{s}/linker.ld", .{@tagName(arch)})));
+    thymos.bundle_ubsan_rt = false;
     thymos.link_z_max_page_size = 0x1000;
     thymos.link_function_sections = true;
     thymos.link_data_sections = true;
@@ -68,12 +70,14 @@ pub fn build(b: *std.Build) void {
     // Install binary into install prefix
     b.installArtifact(thymos);
 
-    // Run step
-    const runStep = b.step("run", "Emulate OS in QEMU");
-    const runCmd = b.addRunArtifact(thymos);
-    runCmd.step.dependOn(b.getInstallStep());
-    runStep.dependOn(&runCmd.step);
-    if (b.args) |args| runCmd.addArgs(args);
+    // Generate docs
+    const genDocs = b.addInstallDirectory(.{
+        .source_dir = thymos.getEmittedDocs(),
+        .install_dir = .prefix,
+        .install_subdir = "docs",
+    });
+    const genDocsStep = b.step("mkDocs", "Generate documentation and place into `zig-out/docs`");
+    genDocsStep.dependOn(&genDocs.step);
 
     // Test step
     const kernelTests = b.addTest(.{ .root_module = kernelMod });
