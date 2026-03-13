@@ -3,8 +3,8 @@
 
 $${\color{red}x86 \textunderscore 64 \space bit \space operating \space system \space in \space zig}$$
 
-![GitHub License](https://img.shields.io/github/license/Voxi0/thymos1?style=for-the-badge&label=License&labelColor=black&color=white)
-![GitHub repo size](https://img.shields.io/github/repo-size/Voxi0/thymos1?style=for-the-badge&label=size&labelColor=black&color=white)
+![GitHub License](https://img.shields.io/github/license/Voxi0/thymos?style=for-the-badge&label=License&labelColor=black&color=white)
+![GitHub repo size](https://img.shields.io/github/repo-size/Voxi0/thymos?style=for-the-badge&label=size&labelColor=black&color=white)
 ![GitHub Repo stars](https://img.shields.io/github/stars/Voxi0/thymos?style=for-the-badge&labelColor=black&color=white)
 
 </div>
