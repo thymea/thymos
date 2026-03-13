@@ -2,9 +2,9 @@
 //! Until a proper GPU driver is loaded, the framebuffer is all there is for rendering anything.
 
 const root = @import("../root.zig");
-const utils = @import("../utils.zig");
 const colors = @import("../colors.zig");
 const c = root.c;
+const arch = root.arch;
 const printf = root.printf;
 
 // Request a linear framebuffer
@@ -33,7 +33,7 @@ pub const FONT_HEIGHT: u8 = 16;
 /// This function also initializes SSFN which is a library for rendering text on the screen. It uses `.sfn` font files.
 pub fn init(bgColor: u32, fgColor: u32) void {
     // Fetch the first available framebuffer
-    const fbResponse: *c.limine_framebuffer_response = @ptrCast(fbRequest.response orelse utils.halt());
+    const fbResponse: *c.limine_framebuffer_response = @ptrCast(fbRequest.response orelse arch.halt());
     fb = @ptrCast(fbResponse.framebuffers[0]);
     pixelsPerRow = fb.pitch / (fb.bpp / 8);
     fbWidth = @intCast(fb.width - 1);

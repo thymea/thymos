@@ -40,8 +40,10 @@ pub fn build(b: *std.Build) void {
         .red_zone = false,
         .pic = false,
         .sanitize_c = .off,
+        .strip = true,
     });
     kernelMod.addIncludePath(b.path(INCLUDE_DIR));
+    kernelMod.addAssemblyFile(b.path(b.fmt("src/arch/{s}/asm.s", .{@tagName(arch)})));
     kernelMod.addCSourceFile(.{
         .language = .c,
         .file = b.path("src/compat.c"),
@@ -60,8 +62,9 @@ pub fn build(b: *std.Build) void {
         .root_module = kernelMod,
         .linkage = .static,
     });
-    thymos.setLinkerScript(b.path(b.fmt("src/arch/{s}/linker.ld", .{@tagName(arch)})));
     thymos.bundle_ubsan_rt = false;
+    thymos.linker_script = b.path(b.fmt("src/arch/{s}/linker.ld", .{@tagName(arch)}));
+    thymos.lto = .none;
     thymos.link_z_max_page_size = 0x1000;
     thymos.link_function_sections = true;
     thymos.link_data_sections = true;

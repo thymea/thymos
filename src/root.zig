@@ -5,6 +5,9 @@ pub const c = @cImport({
     @cInclude("ssfn.h");
 });
 
+pub const std = @import("std");
+pub const arch = @import("arch/arch.zig").arch;
+
 // Link with all the functions that the tiny printf implementation offers
 // I'm setting the return type to `void` so I don't have to manually ignore them every single time I use any of these functions
 pub extern fn printf(fmt: [*:0]const u8, ...) void;
