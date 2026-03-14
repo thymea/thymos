@@ -29,8 +29,4 @@ export fn _start() callconv(.c) noreturn {
 // Initializes the video driver and draws stuff
 fn draw() video.VideoError!void {
     try video.clearScreen();
-    try video.drawLine(0, 0, video.fbWidth, video.fbHeight, 0xff0000);
-    try video.drawLine(0, 0, 0, @intCast(video.fb.height - 1), 0xff0000);
-    try video.drawLine(0, @intCast(video.fb.height - 1), @intCast(video.fb.width - 1), 0, 0xff0000);
-    try video.drawLine(@intCast(video.fb.width - 1), 0, @intCast(video.fb.width - 1), @intCast(video.fb.height - 1), 0xff0000);
 }

@@ -51,9 +51,7 @@ pub fn build(b: *std.Build) void {
     kernelMod.addCSourceFile(.{
         .language = .c,
         .file = b.path(b.fmt("{s}/printf/printf.c", .{INCLUDE_DIR})),
-        .flags = &.{
-            "-DPRINTF_INCLUDE_CONFIG_H",
-        },
+        .flags = &.{"-DPRINTF_INCLUDE_CONFIG_H"},
     });
 
     // Binary
