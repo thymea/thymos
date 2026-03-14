@@ -21,8 +21,8 @@ pub const VideoError = error{
 // Framebuffer
 pub var fb: *c.limine_framebuffer = undefined;
 var pixelsPerRow: usize = 0;
-pub var fbWidth: isize = 0;
-pub var fbHeight: isize = 0;
+pub var fbWidth: usize = 0;
+pub var fbHeight: usize = 0;
 
 // Font
 const FONT = @embedFile("../fonts/unifont.sfn");
