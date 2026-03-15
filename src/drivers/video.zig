@@ -1,10 +1,10 @@
 //! This is a basic framebuffer driver that allows us to draw some primitive shapes and text on the screen
 //! Until a proper GPU driver is loaded, the framebuffer is all there is for rendering anything.
 
-const root = @import("../root.zig");
-const colors = @import("../colors.zig");
+const root = @import("common");
+const arch = @import("arch");
+const colors = @import("colors");
 const c = root.c;
-const arch = root.arch;
 const printf = root.printf;
 
 // Request a linear framebuffer

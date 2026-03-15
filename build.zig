@@ -7,7 +7,6 @@ pub fn build(b: *std.Build) void {
     const INCLUDE_DIR: []const u8 = "include";
 
     // Target architecture - Target is the native platform by default
-    // const target = b.standardTargetOptions(.{});
     const arch = b.option(std.Target.Cpu.Arch, "arch", "Target architecture") orelse std.Target.Cpu.Arch.x86_64;
     var targetQuery: std.Target.Query = .{
         .cpu_arch = arch,
@@ -26,11 +25,42 @@ pub fn build(b: *std.Build) void {
     const optimize = b.standardOptimizeOption(.{});
 
     // Modules
+    // Commonly used constants and imports
+    const commonMod = b.addModule("common", .{
+        .root_source_file = b.path("src/common.zig"),
+        .target = b.resolveTargetQuery(targetQuery),
+        .optimize = optimize,
+    });
+    commonMod.addIncludePath(b.path(INCLUDE_DIR));
+
+    // Colors
+    const colorsMod = b.addModule("colors", .{
+        .root_source_file = b.path("src/colors.zig"),
+        .target = b.resolveTargetQuery(targetQuery),
+        .optimize = optimize,
+    });
+
+    // Architecture specific stuff
+    const archMod = b.addModule("arch", .{
+        .root_source_file = b.path("src/arch/arch.zig"),
+        .target = b.resolveTargetQuery(targetQuery),
+        .optimize = optimize,
+        .imports = &.{
+            .{ .name = "common", .module = commonMod },
+            .{ .name = "colors", .module = colorsMod },
+        },
+    });
+
+    // Kernel
     const kernelMod = b.addModule(PROJECT_NAME, .{
         .root_source_file = b.path("src/kernel.zig"),
         .target = b.resolveTargetQuery(targetQuery),
         .optimize = optimize,
-
+        .imports = &.{
+            .{ .name = "common", .module = commonMod },
+            .{ .name = "arch", .module = archMod },
+            .{ .name = "colors", .module = colorsMod },
+        },
         .code_model = .kernel,
         .link_libc = false,
         .link_libcpp = false,
@@ -61,6 +91,7 @@ pub fn build(b: *std.Build) void {
         .linkage = .static,
     });
     thymos.bundle_ubsan_rt = false;
+	thymos.use_llvm = true;
     thymos.linker_script = b.path(b.fmt("src/arch/{s}/linker.ld", .{@tagName(arch)}));
     thymos.lto = .none;
     thymos.link_z_max_page_size = 0x1000;

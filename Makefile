@@ -2,7 +2,7 @@ OS_NAME := thymos
 
 # Toolchain
 ARCH ?= x86_64
-ZIG_FLAGS := -Darch=$(ARCH) -Doptimize=ReleaseSmall --prefix-exe-dir $(ARCH)
+ZIG_FLAGS := -Darch=$(ARCH) -Doptimize=Debug --prefix-exe-dir $(ARCH)
 
 # Directories
 INCLUDE_DIR := include

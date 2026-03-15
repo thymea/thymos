@@ -1,13 +1,13 @@
-const root = @import("root.zig");
-const colors = @import("colors.zig");
-const std = @import("std");
+const root = @import("common");
+const arch = @import("arch");
+const colors = @import("colors");
 
 // Drivers
 const video = @import("drivers/video.zig");
 
 // Aliases
+const std = root.std;
 const c = root.c;
-const arch = root.arch;
 const printf = root.printf;
 
 /// The kernel's entry point.
@@ -31,4 +31,17 @@ export fn _start() callconv(.c) noreturn {
 // Initializes the video driver and draws stuff
 fn draw() video.VideoError!void {
     try video.clearScreen();
+}
+
+// Panic handler
+pub const panic = std.debug.FullPanic(panicHandler);
+fn panicHandler(msg: []const u8, firstTraceAddr: ?usize) noreturn {
+    _ = firstTraceAddr;
+
+    // Display error message
+    c.ssfn_dst.fg = colors.ERR_TEXT_COLOR;
+    printf("\n[PANIC] %s", msg.ptr);
+
+    // Halt CPU indefinitely
+    arch.halt();
 }

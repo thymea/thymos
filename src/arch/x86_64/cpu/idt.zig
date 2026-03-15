@@ -1,5 +1,6 @@
-const root = @import("../../root.zig");
-const colors = @import("../../colors.zig");
+const root = @import("common");
+const colors = @import("colors");
+const pic = @import("../drivers/pic.zig");
 const c = root.c;
 const printf = root.printf;
 
@@ -20,11 +21,11 @@ const idtEntry_t = packed struct {
 
 // Assembly
 extern fn loadIDT(idtr: *idtr_t) void;
-extern var isrStubTable: [32]*anyopaque;
+extern var isrStubTable: [48]*anyopaque;
 
 // IDT
 var idtr: idtr_t = undefined;
-var idt: [32]idtEntry_t align(16) = undefined;
+var idt: [48]idtEntry_t align(16) = undefined;
 
 // Create and load an IDT
 pub fn init() void {
@@ -36,8 +37,12 @@ pub fn init() void {
     idtr.base = @intFromPtr(&idt[0]);
     idtr.limit = @sizeOf(idtEntry_t) * idt.len - 1;
 
-    // The 32 CPU exceptions
-    for (0..32) |i|
+    // Initialize the PICs by remapping them so that they don't cause conflicts with the software interrupts
+    // Software interrupts being the CPU exceptions from interrupt 0 to 32
+    pic.remap(32, 48);
+
+    // The 32 CPU exceptions and 16 hardware interrupts
+    for (0..48) |i|
         setIdtEntry(i, isrStubTable[i], 0x8E);
 
     // Load the IDT

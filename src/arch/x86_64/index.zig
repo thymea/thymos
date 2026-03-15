@@ -1,5 +1,5 @@
-const gdt = @import("gdt.zig");
-const idt = @import("idt.zig");
+const gdt = @import("cpu/gdt.zig");
+const idt = @import("cpu/idt.zig");
 
 /// Initialize the CPU
 pub fn initCPU() void {

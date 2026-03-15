@@ -15,7 +15,7 @@
 			default = pkgs.${system}.mkShellNoCC {
 				nativeBuildInputs = with pkgs.${system}; [
 					# Toolchain
-					zigpkgs.master
+					zig
 					zls
 					gcc
 

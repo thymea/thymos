@@ -64,6 +64,6 @@ loadIDT:
 // Place all ISRs in an array that we can easily use
 .global isrStubTable
 isrStubTable:
-	.rept 32
+	.rept 48
 		.quad isr_stub_\+
 	.endr
